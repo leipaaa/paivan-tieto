@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Päivän tieto</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -1840,6 +1845,53 @@ setInterval(()=>{
   nykyPaiva = tanaan();
   paivitaTekstit(); teeKortit(); if(tila.nakyma!=="visa") naytaNykyinen(); esihae();
 }, 60000);
+</script>
+
+<script>
+/* =========================================================
+   ANIMAATIOT (vain animoitu.html): GSAP + ScrollTrigger + SplitText + Lenis.
+   React Bits -komponentit vaativat Reactin, joten niiden tehosteet on tehty
+   tässä tavallisella GSAP:lla: SplitText (otsikko), AnimatedContent (sisältö), ScrollReveal (ruudut).
+   Kirjastot ladataan CDN:stä defer-attribuutilla → käynnistetään DOMContentLoadedissa.
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  if(!window.gsap) return;   // CDN ei latautunut → sivu toimii ilman animaatioita
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  // Lenis: pehmeä vieritys, tahdistettu ScrollTriggeriin
+  if(window.Lenis){
+    const lenis = new Lenis({autoRaf:false});
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add(t=>lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  // React Bits "SplitText": otsikon kirjaimet nousevat porrastetusti
+  const h1 = document.getElementById("paaotsikko");
+  document.fonts.ready.then(()=>{
+    const s = SplitText.create(h1, {type:"chars"});
+    gsap.from(s.chars, {yPercent:110, opacity:0, duration:.7, ease:"power3.out", stagger:.035,
+      onComplete:()=>s.revert()});   // palautetaan teksti, jotta kielen vaihto toimii
+  });
+  gsap.from(".head > :not(h1), .cards", {opacity:0, y:12, duration:.6, ease:"power2.out", stagger:.06, delay:.2});
+
+  // React Bits "AnimatedContent": jokainen uusi sisältö liukuu esiin
+  const alkuperainen = piirraSisalto;
+  piirraSisalto = function(out, item, tiivis){
+    alkuperainen(out, item, tiivis);
+    gsap.fromTo(out.children, {opacity:0, y:18}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:.06, clearProps:"transform,opacity"});
+  };
+
+  // React Bits "ScrollReveal": ruudukon ruudut ilmestyvät vierittäessä
+  const naytaRuudut = ()=>ScrollTrigger.batch("#ruudukko .tile:not([data-nahty])", {
+    start:"top 92%",
+    onEnter:els=>{ els.forEach(e=>e.dataset.nahty=""); gsap.fromTo(els, {opacity:0, y:30, scale:.98}, {opacity:1, y:0, scale:1, duration:.6, ease:"power3.out", stagger:.08, clearProps:"transform,opacity"}); }
+  });
+  new MutationObserver(()=>{ naytaRuudut(); ScrollTrigger.refresh(); })
+    .observe(document.getElementById("ruudukko"), {childList:true});
+  naytaRuudut();
+});
 </script>
 </body>
 </html>

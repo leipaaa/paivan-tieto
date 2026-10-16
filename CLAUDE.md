@@ -2,7 +2,8 @@
 
 Suomenkielinen (ja englanninkielinen) nettisivu, joka hakee päivittäin vaihtuvaa sisältöä
 Wikimedian avoimista rajapinnoista. Koko sivu on yhdessä tiedostossa `index.html`:
-HTML, CSS ja JavaScript ilman kirjastoja tai käännösvaihetta. Sivu avataan suoraan selaimessa.
+HTML, CSS ja JavaScript ilman käännösvaihetta. Sivu avataan suoraan selaimessa.
+Ainoat kirjastot ovat animaatiot (GSAP, Lenis) CDN:stä, ks. kohta Animaatiot.
 
 ## Julkaisu
 
@@ -16,6 +17,14 @@ noin minuutissa. Älä lisää repoon mitään salaista.
 Libre Bodoni + Public Sans, sanomalehtimäinen). HTML ja JavaScript ovat samat, joten **JS- ja HTML-muutokset
 tehdään molempiin tiedostoihin**. Luokkanimet ja CSS-muuttujat (`--tahti`, `--viiva` luetaan JS:stä) pidetään samoina.
 Molemmat versiot jakavat localStorage-asetukset.
+
+## Animaatiot (vain index.html)
+
+GSAP 3.13 (+ ScrollTrigger, SplitText) ja Lenis 1.3 ladataan jsDelivr-CDN:stä `defer`-attribuutilla, ja tiedoston
+lopussa on oma `<script>`: otsikon kirjainanimaatio, sisällön esiinliukuminen `piirraSisalto`-kääreellä, ruudukon
+ruudut vierittäessä ja pehmeä vieritys. React Bitsin tehosteet on toteutettu tavallisella GSAP:lla, koska sivu ei
+käytä Reactia. Animaatiot ohitetaan, jos `prefers-reduced-motion` on päällä tai CDN ei lataudu.
+`uusi-ulkoasu.html`:ssä ei ole animaatioita, joten tätä osaa ei kopioida sinne.
 
 ## Aiheet ja lähteet
 
