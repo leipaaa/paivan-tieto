@@ -4,6 +4,13 @@ Suomenkielinen (ja englanninkielinen) nettisivu, joka hakee päivittäin vaihtuv
 Wikimedian avoimista rajapinnoista. Koko sivu on yhdessä tiedostossa `index.html`:
 HTML, CSS ja JavaScript ilman kirjastoja tai käännösvaihetta. Sivu avataan suoraan selaimessa.
 
+## Ulkoasuversiot
+
+`uusi-ulkoasu.html` on kopio `index.html`:stä, jossa on eri `<style>` ja fontit ("Editorial Grid / Magazine":
+Libre Bodoni + Public Sans, sanomalehtimäinen). HTML ja JavaScript ovat samat, joten **JS- ja HTML-muutokset
+tehdään molempiin tiedostoihin**. Luokkanimet ja CSS-muuttujat (`--tahti`, `--viiva` luetaan JS:stä) pidetään samoina.
+Molemmat versiot jakavat localStorage-asetukset.
+
 ## Aiheet ja lähteet
 
 | Aihe | Suomeksi | Englanniksi |
