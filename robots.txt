@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://leipaaa.github.io/paivan-tieto/sitemap.xml

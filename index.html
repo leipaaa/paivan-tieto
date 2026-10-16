@@ -3,7 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Päivän tieto</title>
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<title>Päivän tieto – sana, sää ja tietoa joka päivä</title>
+<meta name="description" content="Joka päivä uusi sana, auto, lentokone, pääkaupunki, yleistieto, vitsi ja mietelause sekä päivän sää. Sisältö Wikimedian avoimista lähteistä, suomeksi ja englanniksi.">
+<link rel="canonical" href="https://leipaaa.github.io/paivan-tieto/">
+<meta name="theme-color" content="#1b3326">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Päivän tieto">
+<meta property="og:title" content="Päivän tieto – sana, sää ja tietoa joka päivä">
+<meta property="og:description" content="Joka päivä uusi sana, auto, lentokone, pääkaupunki, yleistieto, vitsi ja mietelause sekä päivän sää.">
+<meta property="og:url" content="https://leipaaa.github.io/paivan-tieto/">
+<meta property="og:image" content="https://leipaaa.github.io/paivan-tieto/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Päivän tieto – sana, auto, lentokone, pääkaupunki, yleistieto, vitsi, mietelause ja sää">
+<meta property="og:locale" content="fi_FI">
+<meta property="og:locale:alternate" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
@@ -23,28 +42,28 @@
 /* Ulkoasu: "Editorial Grid / Magazine" – sanomalehden etusivu.
    Kirjasimet Libre Bodoni (otsikot) + Public Sans (teksti). Ei varjoja eikä pyöristyksiä, viivat erottavat osiot. */
 :root{
-  --bg:#eef1f0; --paper:#f8faf9; --ink:#102a43; --muted:#4a5d6e; --accent:#00676b; --accent-ink:#f8faf9;
-  --line:#c9d3d6; --soft:#e2e8e8; --rule:#102a43;
+  --bg:#f4f1e8; --paper:#fbf9f3; --ink:#1b3326; --muted:#52615a; --accent:#a3264d; --accent-ink:#fbf9f3;
+  --line:#d5d0c2; --soft:#e9e5d8; --rule:#1b3326;
   --ok:#2e6b3f; --err:#b3261e;
-  --tahti:rgba(16,42,67,.28); --viiva:rgba(0,103,107,.35);
+  --tahti:rgba(27,51,38,.28); --viiva:rgba(163,38,77,.35);
   --serif:"Libre Bodoni",Didot,"Bodoni 72",Georgia,serif;
   --sans:"Public Sans","Segoe UI",system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0d1b24; --paper:#13242f; --ink:#e4ecef; --muted:#9fb3bd; --accent:#5cc8c2; --accent-ink:#0d1b24;
-    --line:#24394a; --soft:#1b2f3c; --rule:#e4ecef;
+    --bg:#101a15; --paper:#16231c; --ink:#e6eee8; --muted:#a3b3aa; --accent:#f28fb0; --accent-ink:#101a15;
+    --line:#2a3b32; --soft:#1d2c24; --rule:#e6eee8;
     --ok:#7fd49a; --err:#ff8a7a;
-    --tahti:rgba(228,236,239,.5); --viiva:rgba(92,200,194,.4);
+    --tahti:rgba(230,238,232,.5); --viiva:rgba(242,143,176,.4);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0d1b24; --paper:#13242f; --ink:#e4ecef; --muted:#9fb3bd; --accent:#5cc8c2; --accent-ink:#0d1b24;
-    --line:#24394a; --soft:#1b2f3c; --rule:#e4ecef;
+  --bg:#101a15; --paper:#16231c; --ink:#e6eee8; --muted:#a3b3aa; --accent:#f28fb0; --accent-ink:#101a15;
+    --line:#2a3b32; --soft:#1d2c24; --rule:#e6eee8;
     --ok:#7fd49a; --err:#ff8a7a;
-    --tahti:rgba(228,236,239,.5); --viiva:rgba(92,200,194,.4);
+    --tahti:rgba(230,238,232,.5); --viiva:rgba(242,143,176,.4);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -120,11 +139,11 @@ h1{flex:1 1 100%;text-align:center;font-size:clamp(2.4rem,5vw,3.6rem);font-weigh
 .stage{position:relative;overflow:hidden;background:var(--soft)}
 .stage img{display:block;width:100%;height:min(44vh,380px);object-fit:contain}
 .media:has(.kartta) .stage img{height:min(24vh,250px)}
-.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:0;background:rgba(16,42,67,.72);color:#fff;font:700 1.3rem/1 system-ui,sans-serif;display:grid;place-items:center}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:0;background:rgba(27,51,38,.72);color:#fff;font:700 1.3rem/1 system-ui,sans-serif;display:grid;place-items:center}
 .nav:hover{background:var(--accent)}
 .nav.prev{left:0}
 .nav.next{right:0}
-.count{position:absolute;right:0;bottom:0;background:rgba(16,42,67,.78);color:#fff;font:600 .72rem var(--sans);letter-spacing:.06em;padding:4px 9px}
+.count{position:absolute;right:0;bottom:0;background:rgba(27,51,38,.78);color:#fff;font:600 .72rem var(--sans);letter-spacing:.06em;padding:4px 9px}
 figcaption{font:italic .76rem/1.35 var(--sans);color:var(--muted);margin-top:6px}
 figcaption a{color:inherit}
 .kartta iframe{display:block;width:100%;height:min(24vh,230px);border:1px solid var(--line);background:var(--soft);filter:grayscale(.35)}
@@ -282,6 +301,30 @@ figcaption a{color:inherit}
   .ruudukko.n3 .tile:first-child{grid-column:auto}
   .kbox{padding:5px;width:calc(var(--kw) + 12px)}
 }
+/* Sään kaupunkilomake */
+.saa-lomake{flex-basis:100%;margin:4px 0 8px}
+.saa-lomake label{display:block;font-size:.78rem;font-weight:600;margin-bottom:4px}
+.saa-rivi{display:flex;gap:6px}
+.saa-rivi input{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 10px;min-height:44px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:0}
+.saa-rivi input[aria-invalid="true"]{border-color:var(--err)}
+.saa-rivi button{font:inherit;font-size:.85rem;font-weight:600;min-height:44px;padding:0 12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:0}
+.saa-rivi button:disabled{opacity:.6;cursor:wait}
+.saa-virhe{color:var(--err);font-size:.78rem;line-height:1.35;margin:4px 0 0}
+.saa-virhe:empty{display:none}
+/* Toissijainen painike (Lue lisää), jotta näkymässä on vain yksi pääpainike */
+.inline.toissijainen{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.inline.toissijainen:hover{border-color:var(--ink);background:transparent;color:var(--ink)}
+/* Suostumusbanneri ja alatunnisteen linkit */
+.foot-linkit{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+.foot a{color:var(--muted)}
+.suostumus{position:fixed;left:16px;bottom:16px;z-index:20;max-width:min(560px,calc(100% - 32px));background:var(--paper);color:var(--ink);border:1px solid var(--ink);box-shadow:0 8px 30px rgba(0,0,0,.18);padding:14px 16px;font-size:.88rem;line-height:1.5}
+.suostumus p{margin:0 0 10px}
+.suostumus-napit{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.s-nappi{font:inherit;font-weight:600;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 14px;min-height:44px;cursor:pointer}
+.s-nappi:hover{background:var(--line)}
+.s-nappi.paa{background:var(--ink);color:var(--paper)}
+.s-nappi.paa:hover{opacity:.88}
+@media (max-width:760px){ .suostumus{left:8px;right:8px;bottom:8px;max-width:none} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -306,6 +349,14 @@ figcaption a{color:inherit}
       <button type="button" id="saaKaupunki">📍</button>
       <button type="button" id="saaPuoli">⇄</button>
     </div>
+    <form class="saa-lomake" id="saaLomake" hidden novalidate>
+      <label for="saaHaku" id="saaHakuOtsikko"></label>
+      <div class="saa-rivi">
+        <input id="saaHaku" name="kaupunki" type="text" maxlength="80" autocomplete="address-level2" required aria-describedby="saaVirhe">
+        <button type="submit" id="saaHae"></button>
+      </div>
+      <p class="saa-virhe" id="saaVirhe" aria-live="polite"></p>
+    </form>
     <div class="saa-nyt" id="saaNyt"></div>
     <div class="saa-paivat" id="saaPaivat"></div>
     <div class="saa-lahde"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></div>
@@ -332,7 +383,7 @@ figcaption a{color:inherit}
 
   <div class="foot">
     <span id="footTeksti"></span>
-    <button class="linkbtn" id="nollaaBtn" type="button"></button>
+    <span class="foot-linkit"><a id="linkTietosuoja" href="tietosuoja.html"></a> · <a id="linkEhdot" href="kayttoehdot.html"></a> · <button class="linkbtn" id="suostumusBtn" type="button"></button> · <button class="linkbtn" id="nollaaBtn" type="button"></button></span>
   </div>
 </main>
 
@@ -351,6 +402,13 @@ figcaption a{color:inherit}
   </div>
   <button type="button" class="knayta" id="kissaNayta" hidden>🐱</button>
 </aside>
+<div class="suostumus" id="suostumus" role="region" aria-labelledby="suostumusOtsikko" hidden>
+  <p><strong id="suostumusOtsikko"></strong> <span id="suostumusTeksti"></span> <a id="suostumusLinkki" href="tietosuoja.html"></a></p>
+  <div class="suostumus-napit">
+    <button type="button" class="s-nappi" id="suostumusEi"></button>
+    <button type="button" class="s-nappi paa" id="suostumusKylla"></button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -390,7 +448,7 @@ async function getJSON(url, ms=12000, headers){
 let KIELI = store.get("kieli","fi")==="en" ? "en" : "fi";
 const TEKSTIT = {
   fi:{
-    otsikko:"Päivän tieto", suosikit:"Suosikit", tumma:"Tumma", vaalea:"Vaalea", tummaan:"Vaihda tummaan teemaan", vaaleaan:"Vaihda vaaleaan teemaan",
+    otsikko:"Päivän tieto", sivun_otsikko:"Päivän tieto – sana, sää ja tietoa joka päivä", suosikit:"Suosikit", tumma:"Tumma", vaalea:"Vaalea", tummaan:"Vaihda tummaan teemaan", vaaleaan:"Vaihda vaaleaan teemaan",
     ruudukko:"Ruudukko", yksi:"Yksi aihe", nayta_toinen:"Näytä toinen", suosikkeihin:"☆ Suosikkeihin", suosikeissa:"★ Suosikeissa",
     jaa:"Jaa", sanavisa:"Sanavisa", takaisin_sanaan:"Takaisin sanaan", uusi_kysymys:"Uusi kysymys", haetaan:"Haetaan…",
     haetaan_netista:"Haetaan tietoa Internetistä…", haku_epaonnistui:"Tiedon haku epäonnistui. Tarkista nettiyhteys ja yritä uudelleen.",
@@ -398,21 +456,22 @@ const TEKSTIT = {
     suosikki:"Suosikki", ei_suosikkeja:"Ei vielä suosikkeja. Lisää niitä painikkeella ☆ Suosikkeihin.", poista_suosikeista:"Poista suosikeista",
     kopioitu:"Kopioitu leikepöydälle", kopiointi_ei:"Kopiointi ei onnistunut", lisatty:"Lisätty suosikkeihin", poistettu:"Poistettu suosikeista",
     nollattu:"Nähdyt nollattu", nollaa:"Nollaa nähdyt", nollaa_ohje:"Unohda jo näytetyt, jotta ne voivat tulla uudelleen",
-    footer:"Tiedot: Wikisanakirja, Wikipedia, Wikidata, Wikisitaatit, Wikikirjasto, OpenStreetMap ja Wikimedia Commons (vapaat lisenssit). Kissat: GIPHY.",
+    footer:"Tiedot: Wikisanakirja, Wikipedia, Wikidata, Wikisitaatit, Wikikirjasto, OpenStreetMap ja Wikimedia Commons (vapaat lisenssit). Sää: Open-Meteo. Kissat: cataas.com.",
     lahde:"Lähde: ", kuva:"Kuva: ", esim:"Esim. ", tekniset_en:" · Tekniset tiedot englanninkielisestä Wikipediasta", luvut_wd:" · Luvut Wikidatasta",
     visa1:"Mitä sana ", visa2:" tarkoittaa?", pisteet:"Pisteet: ", oikein:"Oikein! ", vaarin:"Väärin. ", lue_lisaa:"Lue lisää sanasta: ", arvotaan:"Arvotaan kysymystä…",
+    tietosuoja:"Tietosuoja", kayttoehdot:"Käyttöehdot", evasteasetukset:"Evästeasetukset", s_otsikko:"Yksityisyys.", s_teksti:"Sivu ei käytä evästeitä, ja asetukset tallentuvat vain selaimeesi. Saako sivu laskea nimetöntä kävijätilastoa (GoatCounter, ilman evästeitä)?", s_linkki:"Tietosuojaseloste", s_kylla:"Salli tilastot", s_ei:"Vain välttämättömät",
     valitse:"Valitse ruudukkoon 1–4 aihetta:", paivita_kaikki:"Päivitä kaikki", lue_lisaa_nappi:"Lue lisää", nayta_vahemman:"Näytä vähemmän", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
     kaupunkeihin:"Vaihda kaupunkeihin", paakaupunkeihin:"Vaihda pääkaupunkeihin",
     kissa:"Päivän kissa", kissa_lyhyt:"Kissa", kissa_isompi:"Suurenna kissaa", kissa_pienempi:"Pienennä kissaa", kissa_kahva:"Vedä muuttaaksesi kissan kokoa", seuraava_kissa:"Seuraava kissa", piilota_kissa:"Piilota kissa", nayta_kissa:"Näytä kissa", kissa_asetus:"Giphy-asetukset",
-    giphy_kysy:"Giphy API -avain. Jätä tyhjäksi, niin käytetään cataas.com-kissoja. Kirjoita \"oletus\", niin palautetaan sivun oma avain.",
+    giphy_kysy:"Oma Giphy API -avain (tallentuu vain tähän selaimeen). Jätä tyhjäksi, niin käytetään cataas.com-kissoja.", giphy_virhe:"Avain ei kelpaa: vain kirjaimia ja numeroita, 20–64 merkkiä",
     giphy_ok:"Giphy-avain tallennettu", giphy_pois:"Käytetään cataas.com-kissoja",
     kuvan_sivu:"Avaa kuvan sivu", ed_kuva:"Edellinen kuva", seur_kuva:"Seuraava kuva", aiheet:"Aiheet",
     esitelty:"Esitelty ", ensilento:"Ensilento ",
-    saa_kaupunki:"Vaihda sään kaupunki", saa_puoli:"Siirrä sää toiselle puolelle", saa_kysy:"Minkä kaupungin sää näytetään?", saa_ei_loydy:"Kaupunkia ei löytynyt", saa_virhe:"Säätä ei saatu haettua", tuntuu:"Tuntuu kuin", tuuli:"Tuuli", kosteus:"Kosteus",
+    saa_kaupunki:"Vaihda sään kaupunki", saa_puoli:"Siirrä sää toiselle puolelle", saa_kysy:"Minkä kaupungin sää näytetään?", saa_ei_loydy:"Kaupunkia ei löytynyt. Tarkista kirjoitusasu.", saa_hae:"Hae", saa_lyhyt:"Kirjoita vähintään 2 merkkiä.", saa_merkit:"Käytä vain kirjaimia, välilyöntejä ja yhdysmerkkejä.", saa_virhe:"Säätä ei saatu haettua", tuntuu:"Tuntuu kuin", tuuli:"Tuuli", kosteus:"Kosteus",
     maa:"Maa", maanosa:"Maanosa", asukasluku:"Asukasluku", maan_asukasluku:"Maan asukasluku", pinta_ala:"Maan pinta-ala", kieli:"Virallinen kieli", valuutta:"Valuutta", korkeus:"Korkeus merenpinnasta"
   },
   en:{
-    otsikko:"Daily Facts", suosikit:"Favourites", tumma:"Dark", vaalea:"Light", tummaan:"Switch to dark theme", vaaleaan:"Switch to light theme",
+    otsikko:"Daily Facts", sivun_otsikko:"Daily Facts – a word, weather and facts every day", suosikit:"Favourites", tumma:"Dark", vaalea:"Light", tummaan:"Switch to dark theme", vaaleaan:"Switch to light theme",
     ruudukko:"Grid", yksi:"Single topic", nayta_toinen:"Show another", suosikkeihin:"☆ Add to favourites", suosikeissa:"★ In favourites",
     jaa:"Share", sanavisa:"Word quiz", takaisin_sanaan:"Back to word", uusi_kysymys:"New question", haetaan:"Loading…",
     haetaan_netista:"Fetching from the internet…", haku_epaonnistui:"Could not load. Check your connection and try again.",
@@ -420,17 +479,18 @@ const TEKSTIT = {
     suosikki:"Favourite", ei_suosikkeja:"No favourites yet. Add some with the ☆ button.", poista_suosikeista:"Remove from favourites",
     kopioitu:"Copied to clipboard", kopiointi_ei:"Could not copy", lisatty:"Added to favourites", poistettu:"Removed from favourites",
     nollattu:"Seen items cleared", nollaa:"Clear seen items", nollaa_ohje:"Forget what has been shown so it can appear again",
-    footer:"Sources: Wiktionary, Wikipedia, Wikidata, Wikiquote, icanhazdadjoke, OpenStreetMap and Wikimedia Commons (free licences). Cats: GIPHY.",
+    footer:"Sources: Wiktionary, Wikipedia, Wikidata, Wikiquote, icanhazdadjoke, OpenStreetMap and Wikimedia Commons (free licences). Weather: Open-Meteo. Cats: cataas.com.",
     lahde:"Source: ", kuva:"Image: ", esim:"E.g. ", tekniset_en:"", luvut_wd:" · Figures from Wikidata",
     visa1:"What does ", visa2:" mean?", pisteet:"Score: ", oikein:"Correct! ", vaarin:"Wrong. ", lue_lisaa:"Read more: ", arvotaan:"Picking a question…",
+    tietosuoja:"Privacy", kayttoehdot:"Terms", evasteasetukset:"Cookie settings", s_otsikko:"Privacy.", s_teksti:"This site uses no cookies, and your settings stay in your browser. May the site count anonymous visitor statistics (GoatCounter, cookieless)?", s_linkki:"Privacy policy", s_kylla:"Allow statistics", s_ei:"Essential only",
     valitse:"Choose 1–4 topics for the grid:", paivita_kaikki:"Refresh all", lue_lisaa_nappi:"Read more", nayta_vahemman:"Show less", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
     kaupunkeihin:"Switch to cities", paakaupunkeihin:"Switch to capitals",
     kissa:"Cat of the moment", kissa_lyhyt:"Cat", kissa_isompi:"Make the cat bigger", kissa_pienempi:"Make the cat smaller", kissa_kahva:"Drag to resize the cat", seuraava_kissa:"Next cat", piilota_kissa:"Hide cat", nayta_kissa:"Show cat", kissa_asetus:"Giphy settings",
-    giphy_kysy:"Giphy API key. Leave empty to use cats from cataas.com. Type \"default\" to restore the page's own key.",
+    giphy_kysy:"Your own Giphy API key (stored only in this browser). Leave empty to use cats from cataas.com.", giphy_virhe:"Invalid key: letters and numbers only, 20–64 characters",
     giphy_ok:"Giphy key saved", giphy_pois:"Using cataas.com cats",
     kuvan_sivu:"Open image page", ed_kuva:"Previous image", seur_kuva:"Next image", aiheet:"Topics",
     esitelty:"Introduced ", ensilento:"First flight ",
-    saa_kaupunki:"Change weather city", saa_puoli:"Move weather to the other side", saa_kysy:"Which city's weather should be shown?", saa_ei_loydy:"City not found", saa_virhe:"Could not load the weather", tuntuu:"Feels like", tuuli:"Wind", kosteus:"Humidity",
+    saa_kaupunki:"Change weather city", saa_puoli:"Move weather to the other side", saa_kysy:"Which city's weather should be shown?", saa_ei_loydy:"City not found. Check the spelling.", saa_hae:"Search", saa_lyhyt:"Type at least 2 characters.", saa_merkit:"Use only letters, spaces and hyphens.", saa_virhe:"Could not load the weather", tuntuu:"Feels like", tuuli:"Wind", kosteus:"Humidity",
     maa:"Country", maanosa:"Continent", asukasluku:"Population", maan_asukasluku:"Country population", pinta_ala:"Country area", kieli:"Official language", valuutta:"Currency", korkeus:"Elevation"
   }
 };
@@ -1231,8 +1291,8 @@ function piirraSisalto(out,item,tiivis){
     out.append(media);
   }
   PIIRRA[item.tyyppi](out,item,tiivis);
-  if(tiivis && onLisaa(item)) out.append(nappi(T("lue_lisaa_nappi")+" ▾","inline",()=>piirraSisalto(out,item,"auki")));
-  if(auki) out.append(nappi(T("nayta_vahemman")+" ▴","inline",()=>{
+  if(tiivis && onLisaa(item)) out.append(nappi(T("lue_lisaa_nappi")+" ▾","inline toissijainen",()=>piirraSisalto(out,item,"auki")));
+  if(auki) out.append(nappi(T("nayta_vahemman")+" ▴","inline toissijainen",()=>{
     piirraSisalto(out,item,true);
     const t = out.closest(".tile"); if(t) t.scrollIntoView({block:"nearest"});
   }));
@@ -1562,13 +1622,16 @@ function paivitaTeemaNappi(){
 /* ---------- Kieli ---------- */
 function paivitaTekstit(){
   document.documentElement.lang = KIELI;
-  document.title = T("otsikko");
+  document.title = T("sivun_otsikko");
   $("paaotsikko").textContent = T("otsikko");
   $("pvm").textContent = new Date().toLocaleDateString(lokaali(),{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   $("kieliFi").setAttribute("aria-pressed",String(KIELI==="fi"));
   $("kieliEn").setAttribute("aria-pressed",String(KIELI==="en"));
   $("footTeksti").textContent = T("footer");
   $("nollaaBtn").textContent = T("nollaa"); $("nollaaBtn").title = T("nollaa_ohje");
+  $("linkTietosuoja").textContent = T("tietosuoja"); $("linkEhdot").textContent = T("kayttoehdot");
+  $("suostumusBtn").textContent = T("evasteasetukset");
+  suostumus.tekstit();
   $("jaaBtn").textContent = T("jaa");
   kissa.tekstit();
   saa.tekstit();
@@ -1695,9 +1758,9 @@ const kissa = (()=>{
     if(e.key==="ArrowDown"||e.key==="ArrowRight"){ asetaKoko(koko-12,true); e.preventDefault(); }
   });
   window.addEventListener("resize",()=>asetaKoko(toive,false));
-  // Giphy-avain. Huom: avain näkyy sivun lähdekoodissa kaikille, jotka avaavat sivun.
-  const GIPHY_OLETUS = "G9Z3esLRm3nJ586Ro5CZLXU7oFqA8SV7";
-  const avain = () => { const v = store.get("giphy-avain",null); return (v===null ? GIPHY_OLETUS : v).trim(); };
+  // Giphy-avainta ei pidetä lähdekoodissa. Oletuksena cataas.com; oman avaimen voi syöttää ⚙-painikkeesta,
+  // ja se tallentuu vain käyttäjän omaan selaimeen.
+  const avain = () => String(store.get("giphy-avain","")||"").trim();
   async function seuraava(){
     let src = null, sivu = null;
     const k = avain();
@@ -1736,13 +1799,45 @@ const kissa = (()=>{
   $("kissaAsetus").addEventListener("click",()=>{
     const v = prompt(T("giphy_kysy"), avain());
     if(v===null) return;
-    if(/^(oletus|default)$/i.test(v.trim())) store.del("giphy-avain");
-    else store.set("giphy-avain", v.trim());
-    ilmoita(v.trim() ? T("giphy_ok") : T("giphy_pois"));
+    const k = v.trim();
+    if(k && !/^[A-Za-z0-9]{20,64}$/.test(k)){ ilmoita(T("giphy_virhe")); return; }
+    if(k) store.set("giphy-avain", k); else store.del("giphy-avain");
+    ilmoita(k ? T("giphy_ok") : T("giphy_pois"));
     seuraava();
   });
   asetaKoko(toive,false);
   return {tekstit, kaynnista(){ nakyy(!store.get("kissa-piilossa",false)); }};
+})();
+
+/* =========================================================
+   Suostumus ja analytiikka: GoatCounter ladataan vain, jos käyttäjä sallii tilastot.
+   ========================================================= */
+const suostumus = (()=>{
+  // GoatCounter-tilin koodi (https://KOODI.goatcounter.com). Tyhjä = analytiikka pois päältä.
+  const ANALYTIIKKA = "";
+  function lataa(){
+    if(!ANALYTIIKKA || document.getElementById("goatcounter")) return;
+    const s = document.createElement("script");
+    s.id = "goatcounter"; s.async = true; s.src = "https://gc.zgo.at/count.js";
+    s.dataset.goatcounter = "https://"+ANALYTIIKKA+".goatcounter.com/count";
+    document.head.append(s);
+  }
+  function valitse(v){
+    store.set("suostumus",v); $("suostumus").hidden = true;
+    if(v==="kaikki") lataa(); else { const s = document.getElementById("goatcounter"); if(s) s.remove(); }
+  }
+  function tekstit(){
+    $("suostumusOtsikko").textContent = T("s_otsikko"); $("suostumusTeksti").textContent = T("s_teksti");
+    $("suostumusLinkki").textContent = T("s_linkki");
+    $("suostumusKylla").textContent = T("s_kylla"); $("suostumusEi").textContent = T("s_ei");
+  }
+  $("suostumusKylla").addEventListener("click",()=>valitse("kaikki"));
+  $("suostumusEi").addEventListener("click",()=>valitse("valttamattomat"));
+  $("suostumusBtn").addEventListener("click",()=>{ $("suostumus").hidden = false; $("suostumusEi").focus(); });
+  return {tekstit, kaynnista(){
+    const v = store.get("suostumus",null);
+    if(v==="kaikki") lataa(); else if(v===null) $("suostumus").hidden = false;
+  }};
 })();
 
 /* =========================================================
@@ -1796,16 +1891,30 @@ const saa = (()=>{
     }catch(e){ virhe = !data; }
     piirra();
   }
-  $("saaKaupunki").addEventListener("click",async()=>{
-    const v = prompt(T("saa_kysy"), kaupunki.nimi);
-    if(!v || !v.trim()) return;
+  // Kaupungin vaihto lomakkeella: tarkistus ennen hakua, virhe kentän alla
+  const lomake = $("saaLomake"), kentta = $("saaHaku"), virheRivi = $("saaVirhe"), haeNappi = $("saaHae");
+  function lomakeVirhe(t){ virheRivi.textContent = t||""; kentta.setAttribute("aria-invalid", t ? "true" : "false"); }
+  function lomakeAuki(auki){
+    lomake.hidden = !auki; $("saaKaupunki").setAttribute("aria-expanded", String(auki)); lomakeVirhe("");
+    if(auki){ kentta.value = kaupunki.nimi; kentta.focus(); kentta.select(); }
+  }
+  $("saaKaupunki").addEventListener("click",()=>lomakeAuki(lomake.hidden));
+  kentta.addEventListener("keydown",e=>{ if(e.key==="Escape"){ lomakeAuki(false); $("saaKaupunki").focus(); } });
+  kentta.addEventListener("input",()=>{ if(kentta.getAttribute("aria-invalid")==="true") lomakeVirhe(""); });
+  lomake.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const v = kentta.value.trim().replace(/\s+/g," ");
+    if(v.length<2) return lomakeVirhe(T("saa_lyhyt"));
+    if(!/^[\p{L}\p{M}][\p{L}\p{M} .'’-]*$/u.test(v)) return lomakeVirhe(T("saa_merkit"));
+    haeNappi.disabled = true; haeNappi.textContent = T("haetaan");
     try{
-      const j = await getJSON("https://geocoding-api.open-meteo.com/v1/search?count=1&language="+KIELI+"&name="+encodeURIComponent(v.trim()));
+      const j = await getJSON("https://geocoding-api.open-meteo.com/v1/search?count=1&language="+KIELI+"&name="+encodeURIComponent(v));
       const r = j.results && j.results[0];
-      if(!r){ ilmoita(T("saa_ei_loydy")); return; }
+      if(!r) return lomakeVirhe(T("saa_ei_loydy"));
       kaupunki = {nimi:r.name, alue:r.admin1||"", maa:r.country_code||"", lat:r.latitude, lon:r.longitude};
-      store.set("saa-kaupunki",kaupunki); data = null; piirra(); hae();
-    }catch(e){ ilmoita(T("saa_virhe")); }
+      store.set("saa-kaupunki",kaupunki); data = null; lomakeAuki(false); piirra(); hae();
+    }catch(err){ lomakeVirhe(T("saa_virhe")); }
+    finally{ haeNappi.disabled = false; haeNappi.textContent = T("saa_hae"); }
   });
   $("saaPuoli").addEventListener("click",()=>{
     const p = store.get("saa-puoli","vasen")==="vasen" ? "oikea" : "vasen";
@@ -1813,6 +1922,7 @@ const saa = (()=>{
   });
   function tekstit(){
     for(const [id,a] of [["saaKaupunki","saa_kaupunki"],["saaPuoli","saa_puoli"]]){ $(id).title = T(a); $(id).setAttribute("aria-label",T(a)); }
+    $("saaHakuOtsikko").textContent = T("saa_kysy"); $("saaHae").textContent = T("saa_hae");
     piirra();
   }
   puoli(store.get("saa-puoli","vasen"));
@@ -1847,8 +1957,11 @@ paivitaTekstit();
 teeKortit();
 naytaNykyinen();
 esihae();
-kissa.kaynnista();
+// kissagif (1–2 Mt) ladataan vasta sivun jälkeen, ettei se hidasta pääsisältöä
+if(document.readyState==="complete") setTimeout(kissa.kaynnista,800);
+else addEventListener("load",()=>setTimeout(kissa.kaynnista,800),{once:true});
 saa.kaynnista();
+suostumus.kaynnista();
 // Sivu voi olla auki yön yli: kun päivä vaihtuu, näytetään uuden päivän valinnat ilman päivitystä
 let nykyPaiva = tanaan();
 setInterval(()=>{

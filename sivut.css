@@ -1,0 +1,39 @@
+/* Yhteinen tyyli lisäsivuille (tietosuoja, käyttöehdot, 404). Värit samat kuin index.html:n lehtiulkoasussa. */
+:root{
+  --bg:#f4f1e8; --paper:#fbf9f3; --ink:#1b3326; --muted:#52615a; --accent:#a3264d; --line:#d5d0c2; --rule:#1b3326;
+  --serif:"Libre Bodoni",Didot,"Bodoni 72",Georgia,serif;
+  --sans:"Public Sans","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#101a15; --paper:#16231c; --ink:#e6eee8; --muted:#a3b3aa; --accent:#f28fb0; --line:#2a3b32; --rule:#e6eee8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101a15; --paper:#16231c; --ink:#e6eee8; --muted:#a3b3aa; --accent:#f28fb0; --line:#2a3b32; --rule:#e6eee8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans)}
+a{color:var(--accent);text-underline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+[hidden]{display:none!important}
+.sivu{max-width:760px;margin:0 auto;padding:28px 20px 48px}
+.yla{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:4px double var(--rule);margin-bottom:28px}
+.koti{flex:1;font:700 1.6rem/1 var(--serif);color:var(--ink);text-decoration:none}
+.kielet{display:inline-flex;border:1px solid var(--rule)}
+.kielet button{font:700 .78rem var(--sans);letter-spacing:.08em;border:0;background:transparent;color:var(--muted);padding:8px 12px;min-height:40px;cursor:pointer}
+.kielet button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+h1{font:700 clamp(2.2rem,6vw,3.2rem)/1.05 var(--serif);margin:0 0 8px}
+.pvm{font:600 .75rem var(--sans);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 28px}
+h2{font:700 1.35rem/1.25 var(--serif);margin:32px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+p,li{max-width:68ch}
+ul{padding-left:1.3em}
+li{margin-bottom:6px}
+.iso{font:700 clamp(4rem,16vw,8rem)/1 var(--serif);color:var(--accent);margin:0}
+.nappi{display:inline-block;margin-top:18px;font:600 .8rem var(--sans);text-transform:uppercase;letter-spacing:.08em;background:var(--ink);color:var(--paper);padding:12px 18px;text-decoration:none}
+.nappi:hover{background:var(--accent)}
+footer{margin-top:40px;padding-top:10px;border-top:4px double var(--rule);font-size:.82rem;color:var(--muted)}
+footer a{color:var(--muted)}
