@@ -4,6 +4,12 @@ Suomenkielinen (ja englanninkielinen) nettisivu, joka hakee päivittäin vaihtuv
 Wikimedian avoimista rajapinnoista. Koko sivu on yhdessä tiedostossa `index.html`:
 HTML, CSS ja JavaScript ilman kirjastoja tai käännösvaihetta. Sivu avataan suoraan selaimessa.
 
+## Julkaisu
+
+Repo `leipaaa/paivan-tieto` on julkinen ja julkaistaan GitHub Pagesilla `main`-haaran juuresta:
+https://leipaaa.github.io/paivan-tieto/ (ja `uusi-ulkoasu.html`). Jokainen push `main`-haaraan päivittää sivun
+noin minuutissa. Älä lisää repoon mitään salaista.
+
 ## Ulkoasuversiot
 
 `uusi-ulkoasu.html` on kopio `index.html`:stä, jossa on eri `<style>` ja fontit ("Editorial Grid / Magazine":
