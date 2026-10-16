@@ -1951,9 +1951,7 @@ paivitaTekstit();
 teeKortit();
 naytaNykyinen();
 esihae();
-// kissagif (1–2 Mt) ladataan vasta sivun jälkeen, ettei se hidasta pääsisältöä
-if(document.readyState==="complete") setTimeout(kissa.kaynnista,800);
-else addEventListener("load",()=>setTimeout(kissa.kaynnista,800),{once:true});
+kissa.kaynnista();
 saa.kaynnista();
 suostumus.kaynnista();
 // Sivu voi olla auki yön yli: kun päivä vaihtuu, näytetään uuden päivän valinnat ilman päivitystä

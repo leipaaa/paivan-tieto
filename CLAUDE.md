@@ -119,7 +119,7 @@ hakufunktio `HAKU`-objektiin ja piirtofunktio `PIIRRA`-objektiin. Hakufunktio pa
 - Ei salaisuuksia frontendissä: sivu on staattinen, joten kaikki koodissa oleva on julkista. Giphy-avain poistettiin
   koodista; vanha avain on yhä git-historiassa, joten se on mitätöitävä Giphyn hallintapaneelissa.
 - Giphy ei toimi ilman API-avainta (401). Kissa vaihtuu 60 s välein, jotta tuntirajat eivät täyty.
-- Kissagifit ovat 1–2 Mt, joten kissa käynnistyy vasta `load`-tapahtuman jälkeen, ettei se hidasta pääsisältöä.
+- Kissa latautuu heti sivun käynnistyessä (käyttäjän toive). Älä viivästytä sitä, vaikka gifit ovat 1–2 Mt.
 - Yksi selkeä pääpainike näkymää kohden: "Näytä toinen" / "Päivitä kaikki". Muut ovat toissijaisia (`.inline.toissijainen`).
 - Kontrasti: tekstin ja taustan suhde vähintään 4,5:1 molemmissa teemoissa ja molemmissa ulkoasuissa.
 
