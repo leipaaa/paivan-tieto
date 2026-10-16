@@ -17,6 +17,7 @@ HTML, CSS ja JavaScript ilman kirjastoja tai käännösvaihetta. Sivu avataan su
 | Päivän mietelause | fi.wikiquote "Malline:Viikon sitaatti/…" + ajattelijoiden sivut | en.wikiquote "Wikiquote:Quote of the day/PÄIVÄ" |
 | Kartta | OpenStreetMap upotus (`export/embed.html`) | sama |
 | Kissagif | Giphy random API (`GIPHY_OLETUS`), varalla cataas.com | sama |
+| Sää | Open-Meteo forecast + geocoding (ei avainta), oletus Helsinki | sama |
 
 Kaikki Wikimedia-kutsut käyttävät `origin=*`, jotta CORS toimii selaimesta.
 
@@ -34,6 +35,13 @@ Tunnisteet ja kommentit ovat suomeksi. Pääosat järjestyksessä:
 - **Näkymät**: `tila.nakyma` = `aihe` | `visa` | `suosikit` | `ruudukko`; `valitseAihe`, `naytaToinen`, `naytaRuudukko`, `naytaSuosikit`, `uusiVisa`
 - **tahtitaivas**: canvas-tausta, tähdet yhdistyvät viivoilla kursoriin
 - **kissa**: kissagif-ikkuna, koko säädettävä (−/+ ja vetokahva), koko tallennetaan
+- **saa**: sääpaneeli; ≥1280 px oma palsta vasemmalla/oikealla (`.wrap.saa-vasen/.saa-oikea`), kapeammalla vaakarivi otsikon alla. Päivittyy 30 min välein.
+- **Päivän vaihtuminen**: minuutin välein tarkistetaan päivämäärä; uusi päivä → uudet päivän valinnat ilman sivun päivitystä.
+
+## Periaate
+
+Sivu toimii kuin staattinen näyttö: sisältö latautuu ja päivittyy itsestään järkevillä oletuksilla.
+Painikkeet (Näytä toinen, Päivitä kaikki, asetukset) ovat lisävalintoja, eivät edellytys.
 
 Uusi aihe lisätään näin: lisää avain `AIHEET`-listaan, nimet `NIMET_K`/`LYHYET_K`-objekteihin,
 hakufunktio `HAKU`-objektiin ja piirtofunktio `PIIRRA`-objektiin. Hakufunktio palauttaa olion
@@ -43,7 +51,7 @@ hakufunktio `HAKU`-objektiin ja piirtofunktio `PIIRRA`-objektiin. Hakufunktio pa
 
 `kieli`, `teema`, `nakyma`, `valittu-aihe`, `ruudukko-aiheet`, `pk-tila`, `suosikit`, `visa-pisteet`,
 `paiva-<aihe>-<kieli>`, `nahty-<aihe>-<kieli>`, `kaupungit-<tila>`, `wotd-lista`,
-`kissa-koko`, `kissa-piilossa`, `giphy-avain`.
+`kissa-koko`, `kissa-piilossa`, `giphy-avain`, `saa-kaupunki`, `saa-puoli`.
 
 ## Opittuja asioita (älä riko näitä)
 

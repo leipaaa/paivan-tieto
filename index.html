@@ -104,7 +104,9 @@ h1{font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.05;letter-spacing:-.02em}
 .media{display:grid;gap:14px;margin-bottom:14px}
 .media figure{margin:0}
 .stage{position:relative;border-radius:10px;overflow:hidden;background:var(--soft)}
-.stage img{display:block;width:100%;height:min(58vh,480px);object-fit:contain}
+.stage img{display:block;width:100%;height:min(44vh,380px);object-fit:contain}
+/* kartan kanssa kuva on matalampi, jotta kuva ja kartta mahtuvat näkyviin ilman vieritystä */
+.media:has(.kartta) .stage img{height:min(30vh,260px)}
 .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(10,19,27,.62);color:#fff;font:700 1.3rem/1 system-ui,sans-serif;cursor:pointer;display:grid;place-items:center}
 .nav:hover{background:rgba(10,19,27,.85)}
 .nav.prev{left:8px}
@@ -112,7 +114,7 @@ h1{font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.05;letter-spacing:-.02em}
 .count{position:absolute;right:10px;bottom:10px;background:rgba(10,19,27,.62);color:#fff;font:600 .78rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;padding:3px 9px;border-radius:999px}
 figcaption{font-size:.78rem;line-height:1.35;color:var(--muted);margin-top:5px}
 figcaption a{color:inherit}
-.kartta iframe{display:block;width:100%;height:260px;border:0;border-radius:10px;background:var(--soft)}
+.kartta iframe{display:block;width:100%;height:min(30vh,240px);border:0;border-radius:10px;background:var(--soft)}
 
 /* Sana */
 .defs{margin:0 0 14px;padding-left:1.4em}
@@ -156,6 +158,8 @@ figcaption a{color:inherit}
 .valinta{font:600 .88rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:36px;cursor:pointer}
 .valinta[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
 .valinta:disabled{opacity:.45;cursor:not-allowed}
+.paivita-kaikki{margin-left:auto;background:var(--birch);border-color:var(--birch);color:#14283a}
+.paivita-kaikki:hover:not(:disabled){background:var(--birch-hover)}
 .ruudukko{display:grid;gap:12px}
 .ruudukko.n1{grid-template-columns:1fr}
 .ruudukko.n2,.ruudukko.n4{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -170,6 +174,44 @@ figcaption a{color:inherit}
 .ruudukko:not(.n1) .quote{font-size:1.2rem}
 .ruudukko:not(.n1) .joke{font-size:1.08rem}
 .tiivis{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Sää: leveällä näytöllä oma palsta vasemmalla tai oikealla, kapealla vaakarivi yläreunassa */
+.saa{background:var(--paper);border-radius:12px;box-shadow:var(--shadow);padding:10px 14px;margin-bottom:14px;font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px}
+.saa-top{display:flex;align-items:center;gap:2px}
+.saa-paikka{font-weight:700;font-size:.95rem;margin-right:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.saa-top button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.95rem;padding:2px 5px;border-radius:6px;min-width:28px;min-height:30px}
+.saa-top button:hover{background:var(--soft);color:var(--ink)}
+#saaPuoli{display:none}
+.saa-nyt{display:flex;align-items:center;gap:10px}
+.saa-ikoni{font-size:2rem;line-height:1}
+.saa-temp{font-size:1.9rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.saa-kuvaus{font-size:.82rem;color:var(--muted);line-height:1.3}
+.saa-kuvaus b{color:var(--ink);font-weight:600}
+.saa-paivat{display:flex;gap:12px;font-size:.8rem;text-align:center}
+.saa-paivat div{display:grid;gap:1px}
+.saa-paivat .pv{color:var(--muted);text-transform:capitalize}
+.saa-paivat .ik{font-size:1.15rem;line-height:1.2}
+.saa-paivat .mm{white-space:nowrap}
+.saa-paivat .mm span{color:var(--muted)}
+.saa-lahde{font-size:.7rem;margin-left:auto}
+.saa-lahde a{color:var(--muted)}
+@media (min-width:1280px){
+  .wrap{max-width:1380px}
+  .wrap.saa-vasen{padding-left:256px}
+  .wrap.saa-oikea{padding-right:256px}
+  .saa{position:absolute;top:18px;width:220px;display:block;padding:12px 14px;margin:0}
+  .saa-vasen .saa{left:20px}
+  .saa-oikea .saa{right:20px}
+  #saaPuoli{display:inline-block}
+  .saa-top{margin-bottom:8px}
+  .saa-paikka{flex:1}
+  .saa-nyt{margin-bottom:10px}
+  .saa-ikoni{font-size:2.4rem}
+  .saa-temp{font-size:2.3rem}
+  .saa-paivat{justify-content:space-between;gap:4px;border-top:1px solid var(--line);padding-top:8px}
+  .saa-lahde{margin-top:8px;text-align:right}
+}
 
 /* Kissagif */
 .kissa{position:fixed;right:14px;bottom:14px;z-index:5}
@@ -239,6 +281,17 @@ figcaption a{color:inherit}
     <button class="iconbtn" id="suosikitBtn" type="button" aria-pressed="false"></button>
     <button class="iconbtn" id="teemaBtn" type="button"></button>
   </div>
+
+  <aside class="saa" id="saa" aria-live="polite">
+    <div class="saa-top">
+      <span class="saa-paikka" id="saaPaikka"></span>
+      <button type="button" id="saaKaupunki">📍</button>
+      <button type="button" id="saaPuoli">⇄</button>
+    </div>
+    <div class="saa-nyt" id="saaNyt"></div>
+    <div class="saa-paivat" id="saaPaivat"></div>
+    <div class="saa-lahde"><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></div>
+  </aside>
 
   <div class="cards" role="tablist" id="cards"></div>
 
@@ -330,13 +383,14 @@ const TEKSTIT = {
     footer:"Tiedot: Wikisanakirja, Wikipedia, Wikidata, Wikisitaatit, Wikikirjasto, OpenStreetMap ja Wikimedia Commons (vapaat lisenssit). Kissat: GIPHY.",
     lahde:"Lähde: ", kuva:"Kuva: ", esim:"Esim. ", tekniset_en:" · Tekniset tiedot englanninkielisestä Wikipediasta", luvut_wd:" · Luvut Wikidatasta",
     visa1:"Mitä sana ", visa2:" tarkoittaa?", pisteet:"Pisteet: ", oikein:"Oikein! ", vaarin:"Väärin. ", lue_lisaa:"Lue lisää sanasta: ", arvotaan:"Arvotaan kysymystä…",
-    valitse:"Valitse ruudukkoon 1–4 aihetta:", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
+    valitse:"Valitse ruudukkoon 1–4 aihetta:", paivita_kaikki:"Päivitä kaikki", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
     kaupunkeihin:"Vaihda kaupunkeihin", paakaupunkeihin:"Vaihda pääkaupunkeihin",
     kissa:"Päivän kissa", kissa_lyhyt:"Kissa", kissa_isompi:"Suurenna kissaa", kissa_pienempi:"Pienennä kissaa", kissa_kahva:"Vedä muuttaaksesi kissan kokoa", seuraava_kissa:"Seuraava kissa", piilota_kissa:"Piilota kissa", nayta_kissa:"Näytä kissa", kissa_asetus:"Giphy-asetukset",
     giphy_kysy:"Giphy API -avain. Jätä tyhjäksi, niin käytetään cataas.com-kissoja. Kirjoita \"oletus\", niin palautetaan sivun oma avain.",
     giphy_ok:"Giphy-avain tallennettu", giphy_pois:"Käytetään cataas.com-kissoja",
     kuvan_sivu:"Avaa kuvan sivu", ed_kuva:"Edellinen kuva", seur_kuva:"Seuraava kuva", aiheet:"Aiheet",
     esitelty:"Esitelty ", ensilento:"Ensilento ",
+    saa_kaupunki:"Vaihda sään kaupunki", saa_puoli:"Siirrä sää toiselle puolelle", saa_kysy:"Minkä kaupungin sää näytetään?", saa_ei_loydy:"Kaupunkia ei löytynyt", saa_virhe:"Säätä ei saatu haettua", tuntuu:"Tuntuu kuin", tuuli:"Tuuli", kosteus:"Kosteus",
     maa:"Maa", maanosa:"Maanosa", asukasluku:"Asukasluku", maan_asukasluku:"Maan asukasluku", pinta_ala:"Maan pinta-ala", kieli:"Virallinen kieli", valuutta:"Valuutta", korkeus:"Korkeus merenpinnasta"
   },
   en:{
@@ -351,13 +405,14 @@ const TEKSTIT = {
     footer:"Sources: Wiktionary, Wikipedia, Wikidata, Wikiquote, icanhazdadjoke, OpenStreetMap and Wikimedia Commons (free licences). Cats: GIPHY.",
     lahde:"Source: ", kuva:"Image: ", esim:"E.g. ", tekniset_en:"", luvut_wd:" · Figures from Wikidata",
     visa1:"What does ", visa2:" mean?", pisteet:"Score: ", oikein:"Correct! ", vaarin:"Wrong. ", lue_lisaa:"Read more: ", arvotaan:"Picking a question…",
-    valitse:"Choose 1–4 topics for the grid:", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
+    valitse:"Choose 1–4 topics for the grid:", paivita_kaikki:"Refresh all", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
     kaupunkeihin:"Switch to cities", paakaupunkeihin:"Switch to capitals",
     kissa:"Cat of the moment", kissa_lyhyt:"Cat", kissa_isompi:"Make the cat bigger", kissa_pienempi:"Make the cat smaller", kissa_kahva:"Drag to resize the cat", seuraava_kissa:"Next cat", piilota_kissa:"Hide cat", nayta_kissa:"Show cat", kissa_asetus:"Giphy settings",
     giphy_kysy:"Giphy API key. Leave empty to use cats from cataas.com. Type \"default\" to restore the page's own key.",
     giphy_ok:"Giphy key saved", giphy_pois:"Using cataas.com cats",
     kuvan_sivu:"Open image page", ed_kuva:"Previous image", seur_kuva:"Next image", aiheet:"Topics",
     esitelty:"Introduced ", ensilento:"First flight ",
+    saa_kaupunki:"Change weather city", saa_puoli:"Move weather to the other side", saa_kysy:"Which city's weather should be shown?", saa_ei_loydy:"City not found", saa_virhe:"Could not load the weather", tuntuu:"Feels like", tuuli:"Wind", kosteus:"Humidity",
     maa:"Country", maanosa:"Continent", asukasluku:"Population", maan_asukasluku:"Country population", pinta_ala:"Country area", kieli:"Official language", valuutta:"Currency", korkeus:"Elevation"
   }
 };
@@ -1332,6 +1387,11 @@ function teeRuudukkoAsetukset(){
     r.append(b);
   }
   r.append(el("span",tila.ruudukko.length+" / 4","ohje"));
+  // Päivittää vain ruudukossa näkyvät aiheet: painaa jokaisen ruudun ↻-painiketta
+  const kaikki = nappi("↻ "+T("paivita_kaikki"),"valinta paivita-kaikki",()=>{
+    $("ruudukko").querySelectorAll(".tile .paivita:not(:disabled)").forEach(b=>b.click());
+  });
+  r.append(kaikki);
 }
 function teeRuudukko(){
   const g = $("ruudukko"), n = tila.ruudukko.length;
@@ -1339,7 +1399,7 @@ function teeRuudukko(){
   for(const k of tila.ruudukko){
     const tile = el("section",null,"tile"), top = el("div",null,"ptop"), h = el("h2",NIMI(k)), out = el("div",null,"out");
     const toiminnot = el("div",null,"actions");
-    const uusi = nappi("↻","btn",async()=>{
+    const uusi = nappi("↻","btn paivita",async()=>{
       uusi.disabled = true; naytaLataus(out);
       const kieli = KIELI;
       try{ const item = await HAKU[k](); if(kieli!==KIELI) return; paiva.set(k,item); paivitaKortit(); piirraSisalto(out,item,n>1); }
@@ -1481,6 +1541,7 @@ function paivitaTekstit(){
   $("nollaaBtn").textContent = T("nollaa"); $("nollaaBtn").title = T("nollaa_ohje");
   $("jaaBtn").textContent = T("jaa");
   kissa.tekstit();
+  saa.tekstit();
   paivitaTeemaNappi();
 }
 function vaihdaKieli(k){
@@ -1655,6 +1716,81 @@ const kissa = (()=>{
 })();
 
 /* =========================================================
+   Sää: Open-Meteo (ei avainta). Kaupunki ja puoli tallennetaan selaimeen.
+   ========================================================= */
+const saa = (()=>{
+  const OLETUS = {nimi:"Helsinki", maa:"FI", lat:60.1699, lon:24.9384};
+  // WMO-säätilakoodit → kuvake ja teksti
+  const KOODIT = [
+    [[0],"☀","Selkeää","Clear"], [[1],"🌤","Enimmäkseen selkeää","Mainly clear"], [[2],"⛅","Puolipilvistä","Partly cloudy"],
+    [[3],"☁","Pilvistä","Overcast"], [[45,48],"🌫","Sumua","Fog"], [[51,53,55],"🌦","Tihkusadetta","Drizzle"],
+    [[56,57,66,67],"🌧","Jäätävää sadetta","Freezing rain"], [[61,63,65],"🌧","Sadetta","Rain"],
+    [[71,73,75,77],"🌨","Lumisadetta","Snow"], [[80,81,82],"🌦","Sadekuuroja","Rain showers"],
+    [[85,86],"🌨","Lumikuuroja","Snow showers"], [[95,96,99],"⛈","Ukkosta","Thunderstorm"]
+  ];
+  const koodi = c => KOODIT.find(r=>r[0].includes(c)) || [[],"·","",""];
+  const ikoni = (c,paiva) => c===0 && !paiva ? "🌙" : koodi(c)[1];
+  const aste = v => Math.round(v)+"°";
+  let kaupunki = store.get("saa-kaupunki",OLETUS), data = null, virhe = false;
+
+  function puoli(p){
+    document.querySelector(".wrap").classList.remove("saa-vasen","saa-oikea");
+    document.querySelector(".wrap").classList.add(p==="oikea" ? "saa-oikea" : "saa-vasen");
+  }
+  function piirra(){
+    $("saaPaikka").textContent = kaupunki.nimi;
+    $("saaPaikka").title = [kaupunki.nimi,kaupunki.alue,kaupunki.maa].filter(Boolean).join(", ");
+    const nyt = $("saaNyt"), pv = $("saaPaivat");
+    if(!data){ nyt.replaceChildren(el("span",virhe ? T("saa_virhe") : T("haetaan"),"saa-kuvaus")); pv.replaceChildren(); return; }
+    const c = data.current, kuvaus = el("div",null,"saa-kuvaus");
+    kuvaus.append(el("b",koodi(c.weather_code)[KIELI==="fi"?2:3]), el("br"),
+      T("tuntuu")+" "+aste(c.apparent_temperature), el("br"),
+      T("tuuli")+" "+Math.round(c.wind_speed_10m)+" m/s · "+T("kosteus")+" "+c.relative_humidity_2m+" %");
+    nyt.replaceChildren(el("span",ikoni(c.weather_code,c.is_day),"saa-ikoni"), el("span",aste(c.temperature_2m),"saa-temp"), kuvaus);
+    const d = data.daily;
+    pv.replaceChildren(...d.time.slice(1,4).map((t,i)=>{
+      const div = el("div"), mm = el("span",aste(d.temperature_2m_max[i+1]),"mm");
+      mm.append(" ", el("span",aste(d.temperature_2m_min[i+1])));
+      div.append(el("span",new Date(t+"T12:00").toLocaleDateString(lokaali(),{weekday:"short"}),"pv"),
+                 el("span",ikoni(d.weather_code[i+1],1),"ik"), mm);
+      div.title = koodi(d.weather_code[i+1])[KIELI==="fi"?2:3];
+      return div;
+    }));
+  }
+  async function hae(){
+    try{
+      data = await getJSON("https://api.open-meteo.com/v1/forecast?latitude="+kaupunki.lat+"&longitude="+kaupunki.lon+
+        "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day"+
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4&wind_speed_unit=ms");
+      virhe = false;
+    }catch(e){ virhe = !data; }
+    piirra();
+  }
+  $("saaKaupunki").addEventListener("click",async()=>{
+    const v = prompt(T("saa_kysy"), kaupunki.nimi);
+    if(!v || !v.trim()) return;
+    try{
+      const j = await getJSON("https://geocoding-api.open-meteo.com/v1/search?count=1&language="+KIELI+"&name="+encodeURIComponent(v.trim()));
+      const r = j.results && j.results[0];
+      if(!r){ ilmoita(T("saa_ei_loydy")); return; }
+      kaupunki = {nimi:r.name, alue:r.admin1||"", maa:r.country_code||"", lat:r.latitude, lon:r.longitude};
+      store.set("saa-kaupunki",kaupunki); data = null; piirra(); hae();
+    }catch(e){ ilmoita(T("saa_virhe")); }
+  });
+  $("saaPuoli").addEventListener("click",()=>{
+    const p = store.get("saa-puoli","vasen")==="vasen" ? "oikea" : "vasen";
+    store.set("saa-puoli",p); puoli(p);
+  });
+  function tekstit(){
+    for(const [id,a] of [["saaKaupunki","saa_kaupunki"],["saaPuoli","saa_puoli"]]){ $(id).title = T(a); $(id).setAttribute("aria-label",T(a)); }
+    piirra();
+  }
+  puoli(store.get("saa-puoli","vasen"));
+  // päivittyy itsestään puolen tunnin välein
+  return {tekstit, kaynnista(){ hae(); setInterval(()=>{ if(!document.hidden) hae(); }, 30*60000); }};
+})();
+
+/* =========================================================
    Käynnistys
    ========================================================= */
 $("uusiBtn").addEventListener("click",naytaToinen);
@@ -1682,6 +1818,14 @@ teeKortit();
 naytaNykyinen();
 esihae();
 kissa.kaynnista();
+saa.kaynnista();
+// Sivu voi olla auki yön yli: kun päivä vaihtuu, näytetään uuden päivän valinnat ilman päivitystä
+let nykyPaiva = tanaan();
+setInterval(()=>{
+  if(tanaan()===nykyPaiva) return;
+  nykyPaiva = tanaan();
+  paivitaTekstit(); teeKortit(); if(tila.nakyma!=="visa") naytaNykyinen(); esihae();
+}, 60000);
 </script>
 </body>
 </html>
