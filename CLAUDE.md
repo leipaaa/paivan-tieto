@@ -5,6 +5,11 @@ Wikimedian avoimista rajapinnoista. Koko sivu on yhdessä tiedostossa `index.htm
 HTML, CSS ja JavaScript ilman käännösvaihetta. Sivu avataan suoraan selaimessa.
 Ainoat kirjastot ovat animaatiot (GSAP, Lenis) CDN:stä, ks. kohta Animaatiot.
 
+## Työkieli
+
+Kaikki viestintä käyttäjän kanssa on suomeksi: vastaukset, kysymykset, yhteenvedot ja commit-viestit.
+Koodin tunnisteet ja kommentit ovat jo suomeksi; sivun käyttöliittymätekstit tehdään edelleen molemmille kielille (fi/en).
+
 ## Julkaisu
 
 Repo `leipaaa/paivan-tieto` on julkinen ja julkaistaan GitHub Pagesilla `main`-haaran juuresta:
