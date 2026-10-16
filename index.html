@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Päivän tieto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script>
+  // Teema ja kieli asetetaan ennen piirtoa, ettei sivu välähdä
+  try{
+    const t = JSON.parse(localStorage.getItem("teema")); if(t==="dark"||t==="light") document.documentElement.dataset.theme = t;
+    const k = JSON.parse(localStorage.getItem("kieli")); if(k==="en") document.documentElement.lang = "en";
+  }catch(e){}
+</script>
+<style>
+:root{
+  --bg:#e9eff3; --paper:#fbfcfd; --ink:#14283a; --muted:#546676; --accent:#1f6f8b;
+  --birch:#e8b931; --birch-hover:#f2c94c; --line:#c5d2db; --soft:#dfe7ec; --bar:#14283a; --bar-ink:#e9eff3;
+  --ok:#2f7d4f; --err:#a23a2e; --shadow:0 1px 2px rgba(20,40,58,.08),0 4px 14px rgba(20,40,58,.06);
+  --tahti:rgba(20,40,58,.55); --viiva:rgba(31,111,139,.55);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a24; --paper:#172633; --ink:#e3ebf1; --muted:#9db0bf; --accent:#6cc0dc;
+    --birch:#e8b931; --birch-hover:#f2c94c; --line:#2c4153; --soft:#21364a; --bar:#0a131b; --bar-ink:#e3ebf1;
+    --ok:#6fcf97; --err:#ff8a7a; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+    --tahti:rgba(225,238,255,.85); --viiva:rgba(108,192,220,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a24; --paper:#172633; --ink:#e3ebf1; --muted:#9db0bf; --accent:#6cc0dc;
+  --birch:#e8b931; --birch-hover:#f2c94c; --line:#2c4153; --soft:#21364a; --bar:#0a131b; --bar-ink:#e3ebf1;
+  --ok:#6fcf97; --err:#ff8a7a; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  --tahti:rgba(225,238,255,.85); --viiva:rgba(108,192,220,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 "Source Serif 4",Georgia,serif;transition:background .2s,color .2s}
+#tahdet{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:18px 20px 28px}
+h1,h2,.big{font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
+h1,h2{margin:0}
+a{color:var(--accent)}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ui{font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
+
+/* Yläpalkki */
+.head{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.05;letter-spacing:-.02em}
+.date{color:var(--muted);margin:0;font-size:.95rem;flex:1 1 auto}
+.iconbtn{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:40px;cursor:pointer}
+.iconbtn:hover{border-color:var(--accent)}
+.iconbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.kielet{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--paper)}
+.kielet button{font:700 .85rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:8px 12px;min-height:40px;cursor:pointer}
+.kielet button[aria-pressed="true"]{background:var(--accent);color:var(--paper)}
+
+/* Aihekortit */
+.cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-bottom:14px}
+@media (max-width:1179px){
+  .cards{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;margin:0 -20px 12px;padding:2px 20px 6px;scrollbar-width:none}
+  .cards::-webkit-scrollbar{display:none}
+  .card{flex:0 0 150px;scroll-snap-align:start}
+}
+.card{display:flex;gap:8px;align-items:center;text-align:left;background:var(--paper);color:var(--ink);border:2px solid transparent;border-radius:12px;padding:8px 10px;min-height:70px;cursor:pointer;box-shadow:var(--shadow);font:inherit;transition:border-color .15s}
+.card:hover{border-color:var(--line)}
+.card[aria-selected="true"]{border-color:var(--accent)}
+.card .txt{min-width:0;flex:1}
+.card .lbl{display:block;font:700 .68rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .prev{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.9rem;line-height:1.28;margin-top:2px;overflow-wrap:anywhere}
+.card img{width:40px;height:40px;object-fit:cover;border-radius:7px;flex:0 0 auto;background:var(--soft)}
+.card .prev.wait{color:var(--muted);font-style:italic}
+
+/* Pääpaneeli ja ruudut */
+.panel,.tile{background:var(--paper);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.ptop{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:12px 16px;background:var(--bar);color:var(--bar-ink)}
+.ptop h2{font-size:1.1rem;flex:1 1 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font:600 .72rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.14)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:0;border-radius:9px;padding:9px 14px;min-height:40px;cursor:pointer;background:rgba(255,255,255,.12);color:var(--bar-ink)}
+.btn:hover{background:rgba(255,255,255,.22)}
+.btn.main{background:var(--birch);color:#14283a}
+.btn.main:hover{background:var(--birch-hover)}
+.btn:disabled{opacity:.55;cursor:wait}
+.out{padding:22px 26px 24px;min-height:220px}
+.hint{color:var(--muted);font-style:italic;margin:0}
+.err{color:var(--err);margin:0 0 12px}
+.big{font-size:clamp(1.8rem,5.5vw,2.6rem);line-height:1.1;margin:0 0 10px;letter-spacing:-.01em;overflow-wrap:anywhere}
+.out p{margin:0 0 12px;max-width:70ch}
+.src{font-size:.88rem;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 .8rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;background:var(--soft);color:var(--ink);border-radius:999px;padding:3px 10px}
+.chip img{height:.95em;width:auto;border-radius:2px;box-shadow:0 0 0 1px var(--line)}
+
+/* Kuvat ja kartta vasemmalle, teksti oikealle */
+.out.has-img{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0 32px;align-items:start}
+.out.has-img>.media{grid-column:1;grid-row:1/span 30}
+.out.has-img>:not(.media){grid-column:2}
+.media{display:grid;gap:14px;margin-bottom:14px}
+.media figure{margin:0}
+.stage{position:relative;border-radius:10px;overflow:hidden;background:var(--soft)}
+.stage img{display:block;width:100%;height:min(58vh,480px);object-fit:contain}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(10,19,27,.62);color:#fff;font:700 1.3rem/1 system-ui,sans-serif;cursor:pointer;display:grid;place-items:center}
+.nav:hover{background:rgba(10,19,27,.85)}
+.nav.prev{left:8px}
+.nav.next{right:8px}
+.count{position:absolute;right:10px;bottom:10px;background:rgba(10,19,27,.62);color:#fff;font:600 .78rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;padding:3px 9px;border-radius:999px}
+figcaption{font-size:.78rem;line-height:1.35;color:var(--muted);margin-top:5px}
+figcaption a{color:inherit}
+.kartta iframe{display:block;width:100%;height:260px;border:0;border-radius:10px;background:var(--soft)}
+
+/* Sana */
+.defs{margin:0 0 14px;padding-left:1.4em}
+.defs li{margin-bottom:8px}
+.defs .esim{display:block;color:var(--muted);font-style:italic;font-size:.95rem}
+.wclass{font:700 .9rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--accent);margin:0 0 6px}
+
+/* Tietotaulukko */
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:4px 0 14px;font-size:.92rem;border-top:1px solid var(--line);padding-top:10px}
+.facts dt{font:600 .85rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted);padding-top:2px}
+.facts dd{margin:0;overflow-wrap:anywhere}
+
+/* Mietelause ja vitsi */
+.quote{margin:0 0 14px;padding:4px 0 4px 20px;border-left:5px solid var(--birch);font:italic 400 clamp(1.3rem,3.6vw,1.75rem)/1.45 "Source Serif 4",Georgia,serif;max-width:46ch}
+.who{font:600 1.05rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;margin:0 0 14px}
+.joke{white-space:pre-line;font-size:clamp(1.15rem,3vw,1.4rem);line-height:1.55;max-width:60ch;margin:0 0 16px;padding:4px 0 4px 20px;border-left:5px solid var(--birch)}
+
+/* Visa */
+.q{font-size:1.15rem;margin:0 0 14px}
+.opts{display:grid;gap:10px;margin:0 0 14px;max-width:760px}
+.opt{text-align:left;font:inherit;font-size:1rem;line-height:1.4;padding:12px 14px;border-radius:10px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--paper))}
+.opt.wrong{border-color:var(--err);background:color-mix(in srgb,var(--err) 12%,var(--paper))}
+.score{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted)}
+.inline{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:0;border-radius:9px;padding:9px 14px;min-height:40px;cursor:pointer;background:var(--birch);color:#14283a}
+
+/* Suosikit */
+.favs{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.favs li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:6px 6px 6px 12px}
+.favs .open{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:6px 0;display:flex;gap:10px;align-items:baseline}
+.favs .open:hover .t{text-decoration:underline}
+.favs .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.favs .del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:6px 10px;border-radius:8px}
+.favs .del:hover{color:var(--err);background:var(--soft)}
+
+/* Ruudukkonäkymä */
+.rasetukset{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--paper);border-radius:12px;box-shadow:var(--shadow)}
+.rasetukset .ohje{font:600 .9rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted);margin-right:4px}
+.valinta{font:600 .88rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:36px;cursor:pointer}
+.valinta[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.valinta:disabled{opacity:.45;cursor:not-allowed}
+.ruudukko{display:grid;gap:12px}
+.ruudukko.n1{grid-template-columns:1fr}
+.ruudukko.n2,.ruudukko.n4{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ruudukko.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tile{display:flex;flex-direction:column;min-width:0}
+.tile .ptop{padding:8px 12px}
+.tile .ptop h2{font-size:1rem}
+.tile .btn{padding:6px 10px;min-height:34px;font-size:.85rem}
+.tile .out{padding:14px 16px 16px;min-height:160px;flex:1}
+.ruudukko:not(.n1) .stage img{height:220px}
+.ruudukko:not(.n1) .big{font-size:1.5rem}
+.ruudukko:not(.n1) .quote{font-size:1.2rem}
+.ruudukko:not(.n1) .joke{font-size:1.08rem}
+.tiivis{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Kissagif */
+.kissa{position:fixed;right:14px;bottom:14px;z-index:5}
+.kbox{position:relative;background:var(--paper);border-radius:12px;box-shadow:var(--shadow),0 0 0 1px var(--line);padding:6px;--kw:144px}
+.kbox img{display:block;width:var(--kw);height:calc(var(--kw)*.76);object-fit:cover;border-radius:8px;background:var(--soft)}
+/* vetokahva vasemmassa yläkulmassa: vedä ulos = isompi, sisään = pienempi */
+.kahva{position:absolute;left:-7px;top:-7px;width:24px;height:24px;border-radius:50%;border:0;padding:0;cursor:nwse-resize;touch-action:none;
+  background:var(--accent);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--paper);font:700 .8rem/1 system-ui,sans-serif}
+.kahva:hover{filter:brightness(1.1)}
+.kbox{width:calc(var(--kw) + 12px)}
+.kbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0 2px;margin-top:4px}
+.kbar span{flex:1 1 100%;font:700 .72rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kbar a{color:inherit}
+.kbar button,.knayta{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.95rem;padding:2px 4px;border-radius:6px;min-width:26px;min-height:28px}
+.kbar button:disabled{opacity:.35;cursor:default}
+.kbar button:hover{background:var(--soft);color:var(--ink)}
+.knayta{background:var(--paper);box-shadow:var(--shadow),0 0 0 1px var(--line);font-size:1.4rem;width:48px;height:48px;border-radius:50%}
+
+/* Alatunniste ja ilmoitus */
+.foot{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-top:12px;font-size:.82rem;color:var(--muted)}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:4px 0}
+.toast{position:fixed;left:50%;bottom:22px;z-index:10;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:900px){
+  .ruudukko.n3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ruudukko.n3 .tile:first-child{grid-column:1/-1}
+}
+@media (max-width:760px){
+  body{font-size:17px}
+  .wrap{padding:12px 12px 120px}
+  .head{gap:6px 8px;margin-bottom:10px}
+  .head h1{flex:1 1 auto}
+  .date{order:3;flex-basis:100%;font-size:.88rem}
+  .head h1{font-size:1.45rem}
+  .iconbtn{padding:6px 9px;min-height:38px;min-width:38px}
+  .iconbtn .lab{display:none}
+  .kielet button{padding:6px 7px;min-height:38px}
+  .kbar span{display:none}
+  .kbar{justify-content:space-between}
+  .cards{margin:0 -12px 10px;padding:2px 12px 6px}
+  .card{flex-basis:144px;min-height:64px}
+  .out{padding:16px 16px 18px}
+  .out.has-img{display:block}
+  .stage img{height:260px}
+  .kartta iframe{height:220px}
+  .ptop{padding:10px 12px}
+  .btn{padding:8px 11px}
+  .ruudukko.n2,.ruudukko.n3,.ruudukko.n4{grid-template-columns:1fr}
+  .ruudukko.n3 .tile:first-child{grid-column:auto}
+  .kbox{padding:5px;width:calc(var(--kw) + 10px)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="tahdet" aria-hidden="true"></canvas>
+<main class="wrap">
+  <div class="head">
+    <h1 id="paaotsikko">Päivän tieto</h1>
+    <p class="date" id="pvm"></p>
+    <div class="kielet" role="group" aria-label="Kieli / Language">
+      <button type="button" id="kieliFi" lang="fi">FI</button>
+      <button type="button" id="kieliEn" lang="en">EN</button>
+    </div>
+    <button class="iconbtn" id="nakymaBtn" type="button" aria-pressed="false"></button>
+    <button class="iconbtn" id="suosikitBtn" type="button" aria-pressed="false"></button>
+    <button class="iconbtn" id="teemaBtn" type="button"></button>
+  </div>
+
+  <div class="cards" role="tablist" id="cards"></div>
+
+  <div class="rasetukset" id="rasetukset" hidden></div>
+  <div class="ruudukko" id="ruudukko" hidden></div>
+
+  <section class="panel" id="paneeli" aria-labelledby="otsikko">
+    <div class="ptop">
+      <h2 id="otsikko"></h2>
+      <div class="actions">
+        <button class="btn main" id="uusiBtn" type="button"></button>
+        <button class="btn" id="pkBtn" type="button"></button>
+        <button class="btn" id="favBtn" type="button"></button>
+        <button class="btn" id="jaaBtn" type="button"></button>
+        <button class="btn" id="visaBtn" type="button"></button>
+      </div>
+    </div>
+    <div class="out" id="tulos" aria-live="polite"></div>
+  </section>
+
+  <div class="foot">
+    <span id="footTeksti"></span>
+    <button class="linkbtn" id="nollaaBtn" type="button"></button>
+  </div>
+</main>
+
+<aside class="kissa" id="kissa" aria-label="Kissa">
+  <div class="kbox" id="kissaBox">
+    <button type="button" class="kahva" id="kissaKahva">⤡</button>
+    <img id="kissaImg" alt="">
+    <div class="kbar">
+      <span id="kissaTxt"></span>
+      <button type="button" id="kissaPienempi">−</button>
+      <button type="button" id="kissaIsompi">+</button>
+      <button type="button" id="kissaSeur">↻</button>
+      <button type="button" id="kissaAsetus">⚙</button>
+      <button type="button" id="kissaPiilo">✕</button>
+    </div>
+  </div>
+  <button type="button" class="knayta" id="kissaNayta" hidden>🐱</button>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* =========================================================
+   Perusapurit
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; };
+const tanaan = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const isoAlku = t => t ? t.charAt(0).toUpperCase()+t.slice(1) : t;
+const urlOsa = t => encodeURIComponent(t.replace(/ /g,"_")).replace(/%2F/g,"/");
+
+function el(tag,txt,cls){ const e=document.createElement(tag); if(txt!=null && txt!=="") e.textContent=txt; if(cls) e.className=cls; return e; }
+function link(href,txt){ const a=el("a",txt); a.href=href; a.target="_blank"; a.rel="noopener"; return a; }
+function nappi(txt,cls,fn,label){ const b=el("button",txt,cls); b.type="button"; if(fn) b.addEventListener("click",fn); if(label){ b.title=label; b.setAttribute("aria-label",label); } return b; }
+
+const store = {
+  get(k,def){ try{ const v=localStorage.getItem(k); return v==null?def:JSON.parse(v); }catch(e){ return def; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+async function getJSON(url, ms=12000, headers){
+  const c = new AbortController(), t = setTimeout(()=>c.abort(), ms);
+  try{
+    const r = await fetch(url,{signal:c.signal, headers:headers||{}});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+
+/* =========================================================
+   Kieli ja tekstit
+   ========================================================= */
+let KIELI = store.get("kieli","fi")==="en" ? "en" : "fi";
+const TEKSTIT = {
+  fi:{
+    otsikko:"Päivän tieto", suosikit:"Suosikit", tumma:"Tumma", vaalea:"Vaalea", tummaan:"Vaihda tummaan teemaan", vaaleaan:"Vaihda vaaleaan teemaan",
+    ruudukko:"Ruudukko", yksi:"Yksi aihe", nayta_toinen:"Näytä toinen", suosikkeihin:"☆ Suosikkeihin", suosikeissa:"★ Suosikeissa",
+    jaa:"Jaa", sanavisa:"Sanavisa", takaisin_sanaan:"Takaisin sanaan", uusi_kysymys:"Uusi kysymys", haetaan:"Haetaan…",
+    haetaan_netista:"Haetaan tietoa Internetistä…", haku_epaonnistui:"Tiedon haku epäonnistui. Tarkista nettiyhteys ja yritä uudelleen.",
+    yrita_uudelleen:"Yritä uudelleen", kortti_virhe:"Haku epäonnistui – yritä uudelleen", paivan_valinta:"Päivän valinta",
+    suosikki:"Suosikki", ei_suosikkeja:"Ei vielä suosikkeja. Lisää niitä painikkeella ☆ Suosikkeihin.", poista_suosikeista:"Poista suosikeista",
+    kopioitu:"Kopioitu leikepöydälle", kopiointi_ei:"Kopiointi ei onnistunut", lisatty:"Lisätty suosikkeihin", poistettu:"Poistettu suosikeista",
+    nollattu:"Nähdyt nollattu", nollaa:"Nollaa nähdyt", nollaa_ohje:"Unohda jo näytetyt, jotta ne voivat tulla uudelleen",
+    footer:"Tiedot: Wikisanakirja, Wikipedia, Wikidata, Wikisitaatit, Wikikirjasto, OpenStreetMap ja Wikimedia Commons (vapaat lisenssit). Kissat: GIPHY.",
+    lahde:"Lähde: ", kuva:"Kuva: ", esim:"Esim. ", tekniset_en:" · Tekniset tiedot englanninkielisestä Wikipediasta", luvut_wd:" · Luvut Wikidatasta",
+    visa1:"Mitä sana ", visa2:" tarkoittaa?", pisteet:"Pisteet: ", oikein:"Oikein! ", vaarin:"Väärin. ", lue_lisaa:"Lue lisää sanasta: ", arvotaan:"Arvotaan kysymystä…",
+    valitse:"Valitse ruudukkoon 1–4 aihetta:", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
+    kaupunkeihin:"Vaihda kaupunkeihin", paakaupunkeihin:"Vaihda pääkaupunkeihin",
+    kissa:"Päivän kissa", kissa_lyhyt:"Kissa", kissa_isompi:"Suurenna kissaa", kissa_pienempi:"Pienennä kissaa", kissa_kahva:"Vedä muuttaaksesi kissan kokoa", seuraava_kissa:"Seuraava kissa", piilota_kissa:"Piilota kissa", nayta_kissa:"Näytä kissa", kissa_asetus:"Giphy-asetukset",
+    giphy_kysy:"Giphy API -avain. Jätä tyhjäksi, niin käytetään cataas.com-kissoja. Kirjoita \"oletus\", niin palautetaan sivun oma avain.",
+    giphy_ok:"Giphy-avain tallennettu", giphy_pois:"Käytetään cataas.com-kissoja",
+    kuvan_sivu:"Avaa kuvan sivu", ed_kuva:"Edellinen kuva", seur_kuva:"Seuraava kuva", aiheet:"Aiheet",
+    esitelty:"Esitelty ", ensilento:"Ensilento ",
+    maa:"Maa", maanosa:"Maanosa", asukasluku:"Asukasluku", maan_asukasluku:"Maan asukasluku", pinta_ala:"Maan pinta-ala", kieli:"Virallinen kieli", valuutta:"Valuutta", korkeus:"Korkeus merenpinnasta"
+  },
+  en:{
+    otsikko:"Daily Facts", suosikit:"Favourites", tumma:"Dark", vaalea:"Light", tummaan:"Switch to dark theme", vaaleaan:"Switch to light theme",
+    ruudukko:"Grid", yksi:"Single topic", nayta_toinen:"Show another", suosikkeihin:"☆ Add to favourites", suosikeissa:"★ In favourites",
+    jaa:"Share", sanavisa:"Word quiz", takaisin_sanaan:"Back to word", uusi_kysymys:"New question", haetaan:"Loading…",
+    haetaan_netista:"Fetching from the internet…", haku_epaonnistui:"Could not load. Check your connection and try again.",
+    yrita_uudelleen:"Try again", kortti_virhe:"Loading failed – try again", paivan_valinta:"Today's pick",
+    suosikki:"Favourite", ei_suosikkeja:"No favourites yet. Add some with the ☆ button.", poista_suosikeista:"Remove from favourites",
+    kopioitu:"Copied to clipboard", kopiointi_ei:"Could not copy", lisatty:"Added to favourites", poistettu:"Removed from favourites",
+    nollattu:"Seen items cleared", nollaa:"Clear seen items", nollaa_ohje:"Forget what has been shown so it can appear again",
+    footer:"Sources: Wiktionary, Wikipedia, Wikidata, Wikiquote, icanhazdadjoke, OpenStreetMap and Wikimedia Commons (free licences). Cats: GIPHY.",
+    lahde:"Source: ", kuva:"Image: ", esim:"E.g. ", tekniset_en:"", luvut_wd:" · Figures from Wikidata",
+    visa1:"What does ", visa2:" mean?", pisteet:"Score: ", oikein:"Correct! ", vaarin:"Wrong. ", lue_lisaa:"Read more: ", arvotaan:"Picking a question…",
+    valitse:"Choose 1–4 topics for the grid:", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
+    kaupunkeihin:"Switch to cities", paakaupunkeihin:"Switch to capitals",
+    kissa:"Cat of the moment", kissa_lyhyt:"Cat", kissa_isompi:"Make the cat bigger", kissa_pienempi:"Make the cat smaller", kissa_kahva:"Drag to resize the cat", seuraava_kissa:"Next cat", piilota_kissa:"Hide cat", nayta_kissa:"Show cat", kissa_asetus:"Giphy settings",
+    giphy_kysy:"Giphy API key. Leave empty to use cats from cataas.com. Type \"default\" to restore the page's own key.",
+    giphy_ok:"Giphy key saved", giphy_pois:"Using cataas.com cats",
+    kuvan_sivu:"Open image page", ed_kuva:"Previous image", seur_kuva:"Next image", aiheet:"Topics",
+    esitelty:"Introduced ", ensilento:"First flight ",
+    maa:"Country", maanosa:"Continent", asukasluku:"Population", maan_asukasluku:"Country population", pinta_ala:"Country area", kieli:"Official language", valuutta:"Currency", korkeus:"Elevation"
+  }
+};
+const T = k => TEKSTIT[KIELI][k];
+const AIHEET = ["sana","auto","lentokone","paakaupunki","tieto","vitsi","mietelause"];
+const NIMET_K = {
+  fi:{sana:"Päivän sana", auto:"Päivän auto", lentokone:"Päivän lentokone", paakaupunki:"Päivän pääkaupunki", kaupunki:"Päivän kaupunki", tieto:"Yleistieto", vitsi:"Päivän vitsi", mietelause:"Päivän mietelause"},
+  en:{sana:"Word of the day", auto:"Car of the day", lentokone:"Aircraft of the day", paakaupunki:"Capital of the day", kaupunki:"City of the day", tieto:"Random fact", vitsi:"Joke of the day", mietelause:"Quote of the day"}
+};
+const LYHYET_K = {
+  fi:{sana:"Sana", auto:"Auto", lentokone:"Lentokone", paakaupunki:"Pääkaupunki", kaupunki:"Kaupunki", tieto:"Yleistieto", vitsi:"Vitsi", mietelause:"Mietelause"},
+  en:{sana:"Word", auto:"Car", lentokone:"Aircraft", paakaupunki:"Capital", kaupunki:"City", tieto:"Fact", vitsi:"Joke", mietelause:"Quote"}
+};
+// Pääkaupunki-aiheella on kaksi tilaa: pääkaupungit tai kaikki suuret kaupungit
+let PK_TILA = store.get("pk-tila","paakaupunki")==="kaupunki" ? "kaupunki" : "paakaupunki";
+const nimiAvain = k => k==="paakaupunki" ? PK_TILA : k;
+const NIMI = (k,item) => NIMET_K[KIELI][item && item.tyyppi==="paakaupunki" && item.tila ? item.tila : nimiAvain(k)];
+const LYHYT = k => LYHYET_K[KIELI][nimiAvain(k)];
+const lokaali = () => KIELI==="fi" ? "fi-FI" : "en-GB";
+
+const API = {
+  wikt:   l => "https://"+l+".wiktionary.org/w/api.php?format=json&formatversion=2&origin=*&action=query",
+  wiki:   l => "https://"+l+".wikipedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query",
+  quote:  l => "https://"+l+".wikiquote.org/w/api.php?format=json&formatversion=2&origin=*&action=query",
+  books:  "https://fi.wikibooks.org/w/api.php?format=json&formatversion=2&origin=*&action=query",
+  commons:"https://commons.wikimedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query",
+  wikidata: () => "https://www.wikidata.org/w/api.php?format=json&origin=*&action=wbgetentities&languages="+(KIELI==="fi"?"fi|en":"en|fi")
+};
+const summary = (lang,title) => getJSON("https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title.replace(/ /g,"_")));
+const wikitext = p => p && !p.missing && p.revisions ? p.revisions[0].slots.main.content : "";
+
+function lyhenna(text,max=650){
+  if(!text || text.length<=max) return text||"";
+  const cut = text.slice(0,max), i = cut.lastIndexOf(". ");
+  return i>max*0.35 ? cut.slice(0,i+1) : cut.replace(/\s+\S*$/,"")+"…";
+}
+
+/* Wikiteksti -> luettava teksti (mallineet, linkit, viitteet pois) */
+function siistiWiki(t){
+  t = t.replace(/<ref[^>]*\/>/gi,"").replace(/<ref[^>]*>[\s\S]*?<\/ref>/gi,"").replace(/<!--[\s\S]*?-->/g,"")
+       .replace(/<noinclude>[\s\S]*?<\/noinclude>/gi,"");
+  t = t.replace(/\[\[(?:Kuva|File|Tiedosto|Image|Luokka|Category):[^\[\]]*(?:\[\[[^\]]*\]\][^\[\]]*)*\]\]/gi,"");
+  t = t.replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g,"$1").replace(/\[https?:[^\s\]]+\s*([^\]]*)\]/g,"$1");
+  for(let k=0;k<6;k++){
+    const ennen = t;
+    t = t.replace(/\{\{([^{}]*)\}\}/g,(m,sis)=>{
+      const o = sis.split("|").map(x=>x.trim()), n = o[0].toLowerCase();
+      const pos = o.slice(1).filter(x=>!/^[\w ]+=/.test(x));
+      if(/^formatnum:/.test(n)) return o[0].slice(10);
+      if(n.startsWith("#")) return "";
+      if(n==="yhteys"||n==="konteksti"||n==="k") return pos.length ? "("+pos.join(", ")+") " : "";
+      if(/^(lb|lbl|label|tlb)$/.test(n)){ const v=pos.slice(1).filter(x=>x!=="_"&&x!=="and"&&x!=="or"); return v.length ? "("+v.join(", ")+") " : ""; }
+      if(/^(q|qual|qualifier|i|gloss|gl|sense|s)$/.test(n)) return pos.length ? "("+pos.join(", ")+") " : "";
+      if(n==="l"||n==="link"||n==="termi"||n==="m"||n==="ll") return pos[1]||pos[0]||"";
+      if(n==="convert"||n==="cvt"){
+        if(/^(-|–|to|and)$/.test(pos[1]||"")) return pos[0]+"–"+pos[2]+" "+(pos[3]||"");
+        return pos[0]+" "+(pos[1]||"");
+      }
+      if(/^(start date|start date and age|end date|end date and age|birth date|dts|date)$/.test(n)){
+        const [y,mo,d] = pos;
+        if(d && /^\d+$/.test(d)) return (+d)+"."+(+mo)+"."+y;
+        if(mo && /^\d+$/.test(mo)) return (+mo)+"/"+y;
+        return y||"";
+      }
+      if(/^(avyear|av|year|flag|flagcountry|nowrap|small|nobr|ill|abbr|taxfmt|taxlink|vern|w|pedia|n-g|ngd|non-gloss definition|non-gloss|1|cap|smallcaps)$/.test(n)) return pos[0]||"";
+      if(n==="lang") return pos[1]||"";
+      if(/^(ubl|unbulleted list|plainlist|plain list|flatlist|hlist|bulleted list)$/.test(n)) return pos.join(", ");
+      return "";
+    });
+    if(t===ennen) break;
+  }
+  t = t.replace(/'{2,}/g,"").replace(/<br\s*\/?>/gi,", ").replace(/<[^>]+>/g,"")
+       .replace(/&nbsp;/g," ").replace(/&mdash;/g,"—").replace(/&ndash;/g,"–").replace(/&amp;/g,"&");
+  return t.replace(/\(\s*\)/g,"").replace(/\s+/g," ").replace(/\s+([,.;:])/g,"$1")
+          .replace(/:,/g,":").replace(/([.!?…]),/g,"$1").replace(/,(\s*,)+/g,",").replace(/^[\s,]+|[\s,]+$/g,"").trim();
+}
+const htmlTekstiksi = h => { const d=document.createElement("div"); d.innerHTML=h||""; return (d.textContent||"").replace(/\s+/g," ").trim(); };
+
+/* =========================================================
+   Muistit: nähdyt, päivän valinnat, suosikit (kielikohtaiset)
+   ========================================================= */
+const nahty = {
+  m:{},
+  avain(k){ return "nahty-"+k+"-"+KIELI; },
+  lista(k){
+    const a = this.avain(k);
+    if(!this.m[a]) this.m[a] = store.get(a, KIELI==="fi" ? store.get("nahty-"+k,[]) : []);
+    return this.m[a];
+  },
+  has(k,v){ return this.lista(k).includes(v); },
+  add(k,v){ const l=this.lista(k); if(l.includes(v)) return; l.push(v); if(l.length>20000) l.shift(); store.set(this.avain(k),l); },
+  nollaaAihe(k){ this.m[this.avain(k)]=[]; store.del(this.avain(k)); },
+  nollaa(){
+    try{ Object.keys(localStorage).filter(k=>/^nahty-/.test(k)).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+    this.m = {};
+  }
+};
+const paivaAvain = k => "paiva-"+nimiAvain(k)+"-"+KIELI;
+const paiva = {
+  get(k){ const v=store.get(paivaAvain(k),null); return v && v.pvm===tanaan() ? v.item : null; },
+  set(k,item){ store.set(paivaAvain(k),{pvm:tanaan(),item}); }
+};
+const suosikit = {
+  lista(){ return store.get("suosikit",[]); },
+  id(item){ return item.tyyppi+":"+(item.kieli||"fi")+":"+item.otsikko; },
+  on(item){ return this.lista().some(x=>this.id(x.item)===this.id(item)); },
+  toggle(item){
+    let l=this.lista(); const id=this.id(item);
+    if(l.some(x=>this.id(x.item)===id)){ l=l.filter(x=>this.id(x.item)!==id); store.set("suosikit",l); return false; }
+    l.unshift({aika:Date.now(),item}); if(l.length>300) l.pop(); store.set("suosikit",l); return true;
+  },
+  poista(id){ store.set("suosikit",this.lista().filter(x=>this.id(x.item)!==id)); }
+};
+
+/* =========================================================
+   Kuvat
+   ========================================================= */
+// Wikimedia antaa pikkukuvat vain vakioleveyksinä (esim. 330, 500, 960). Muut koot epäonnistuvat.
+function isompiKuva(src,leveys){
+  if(!src || !/\/\d+px-/.test(src)) return src;
+  return leveys>=960 || !leveys ? src.replace(/\/\d+px-/,"/960px-") : src;
+}
+function commonsSivu(src){
+  const m = (src||"").match(/\/wikipedia\/commons\/(?:thumb\/)?[0-9a-f]\/[0-9a-f]{2}\/([^/?]+)/);
+  return m ? "https://commons.wikimedia.org/wiki/File:"+m[1] : null;
+}
+const IINFO = "&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=960";
+const KUVA_POIS = /logo|icon|flag|lippu|map|kartta|locator|location|diagram|symbol|emblem|coat.of.arms|vaakuna|signature|badge|seal|chart|graph|plan\b|drawing|3.?view|silhouette|redirect|commons-|wiktionary|edit-|ambox|\.svg$/i;
+function hyvaKuva(p){
+  const i = p.imageinfo && p.imageinfo[0]; if(!i) return false;
+  const r = i.width/i.height;
+  return /^image\/(jpeg|png|webp)/.test(i.mime) && i.width>=400 && i.height>=250 && r<3 && r>0.45 && !KUVA_POIS.test(p.title);
+}
+function kuvaImageinfosta(p){
+  const i = p.imageinfo[0], m = i.extmetadata||{};
+  return { src:i.thumburl||i.url, sivu:i.descriptionurl,
+           tekija:htmlTekstiksi(m.Artist && m.Artist.value).slice(0,80),
+           lisenssi:(m.LicenseShortName && m.LicenseShortName.value)||"" };
+}
+async function tiedostonKuva(nimi){
+  try{ nimi = decodeURIComponent(nimi); }catch(e){}
+  const j = await getJSON(API.commons+IINFO+"&titles="+encodeURIComponent("File:"+nimi.replace(/_/g," ")));
+  const p = j.query && j.query.pages && j.query.pages[0];
+  if(!p || !p.imageinfo) return null;
+  const i = p.imageinfo[0];
+  if(!/^image\/(jpeg|png|webp|gif)/.test(i.mime) || i.width<200 || i.height<150) return null;
+  return kuvaImageinfosta(p);
+}
+async function artikkelinKuvat(base,otsikko,max){
+  try{
+    const j = await getJSON(base+"&redirects=1&generator=images&gimlimit=50"+IINFO+"&titles="+encodeURIComponent(otsikko));
+    return ((j.query && j.query.pages)||[]).filter(hyvaKuva).map(kuvaImageinfosta).slice(0,max||10);
+  }catch(e){ return []; }
+}
+function kuvaRestista(d){
+  if(!d || !d.thumbnail) return null;
+  const leveys = d.originalimage && d.originalimage.width;
+  return {src:isompiKuva(d.thumbnail.source,leveys), varasrc:d.thumbnail.source,
+          sivu:commonsSivu(d.thumbnail.source) || d.content_urls.desktop.page, tekija:"", lisenssi:""};
+}
+function yhdistaKuvat(listat,max){
+  const nahdyt = new Set(), tulos = [];
+  const avain = k => { let s=(k.sivu||k.src).split("/").pop().replace(/^File:/,""); try{ s=decodeURIComponent(s); }catch(e){} return s.replace(/_/g," ").toLowerCase(); };
+  for(const k of listat.flat()){
+    if(!k || !k.src) continue;
+    const a = avain(k); if(nahdyt.has(a)) continue;
+    nahdyt.add(a); tulos.push(k);
+    if(tulos.length>=(max||10)) break;
+  }
+  return tulos;
+}
+
+/* =========================================================
+   HAKU: Päivän sana
+   fi: Wikisanakirjan suomen sanojen luokat
+   en: englanninkielisen Wiktionaryn entiset "Word of the day" -sanat
+   ========================================================= */
+const SANALUOKAT = [
+  ["Suomen kielen kaksitavuiset sanat",3],["Suomen kielen kolmitavuiset sanat",3],
+  ["Suomen kielen substantiivit",1],["Suomen kielen adjektiivit",2],["Suomen kielen verbit",2]
+];
+const ALKUKIRJAIMET = "aaehhiijjkkkkkllmmmnoopppprrsssssttttuuvvvyäö";
+const VOKAALIT = "aaeiioouyäö";
+// Sanat, joita ei haluta päivän sanaksi tai visaan (ikävät aiheet)
+const SOPIMATON = /kidut|murh|raisk|ruumi|teurast|itsemurh|huume|seksi|porno|natsi|kuolem|tappo|tappaa|ampua|ampuminen|pedofi|rasis|neeke|huora|vittu|^perse|paska|^kusi$|runkkaa|fuck|shit|cunt|nigg|whore|slut|\brape|porn|\bsex|suicid|nazi|murder|torture|corpse/i;
+
+async function satunnaisetSanatFi(n){
+  for(let y=0;y<6;y++){
+    const luokat = SANALUOKAT.flatMap(([c,w])=>Array(w).fill(c));
+    const luokka = pick(luokat), alku = pick([...ALKUKIRJAIMET])+pick([...VOKAALIT]);
+    const j = await getJSON(API.wikt("fi")+"&list=categorymembers&cmnamespace=0&cmlimit=100&cmstartsortkeyprefix="+encodeURIComponent(alku)+"&cmtitle="+encodeURIComponent("Luokka:"+luokka));
+    const sanat = j.query.categorymembers.map(x=>x.title)
+      .filter(t=>t.toLowerCase().startsWith(alku[0]) && t.length>=3 && !/[\s:]/.test(t) && t===t.toLowerCase());
+    if(sanat.length>=n) return shuffle(sanat).slice(0,n*3);
+  }
+  throw new Error("ei sanoja");
+}
+let wotdLista = null;
+async function satunnaisetSanatEn(n){
+  if(!wotdLista){
+    const c = store.get("wotd-lista",null);
+    if(c && Date.now()-c.aika < 30*864e5 && c.sanat.length>200) wotdLista = c.sanat;
+    else{
+      let kaikki=[], cont="";
+      for(let k=0;k<10;k++){
+        const j = await getJSON(API.wikt("en")+"&list=embeddedin&einamespace=0&eilimit=500&eititle="+encodeURIComponent("Template:was wotd")+cont, 15000);
+        kaikki = kaikki.concat(j.query.embeddedin.map(x=>x.title));
+        if(!j.continue) break;
+        cont = "&eicontinue="+encodeURIComponent(j.continue.eicontinue);
+      }
+      wotdLista = kaikki.filter(t=>!/:/.test(t));
+      store.set("wotd-lista",{aika:Date.now(),sanat:wotdLista});
+    }
+  }
+  if(wotdLista.length<n) throw new Error("ei sanoja");
+  return shuffle(wotdLista).slice(0,n*3);
+}
+const satunnaisetSanat = n => KIELI==="en" ? satunnaisetSanatEn(n) : satunnaisetSanatFi(n);
+
+function jasennaSanaFi(wt){
+  const rivit = wt.split("\n");
+  const a = rivit.findIndex(r=>/^==\s*Suomi\s*==\s*$/.test(r));
+  if(a<0) return null;
+  let b = rivit.findIndex((r,n)=>n>a && /^==[^=].*[^=]==\s*$/.test(r)); if(b<0) b=rivit.length;
+  const ryhmat=[]; let nyk=null, kuva=null;
+  for(const r of rivit.slice(a+1,b)){
+    const km = r.match(/\[\[(?:Kuva|File|Tiedosto|Image):([^|\]]+)/i); if(km && !kuva) kuva = km[1].trim();
+    const h = r.match(/^===\s*([^=]+?)\s*===\s*$/);
+    if(h){ nyk={luokka:h[1].trim(), maar:[], esim:[]}; ryhmat.push(nyk); continue; }
+    if(/^====/.test(r)){ nyk=null; continue; }
+    if(!nyk) continue;
+    if(/^#[^:*#]/.test(r)){
+      const s = siistiWiki(r.slice(1));
+      if(s.length>1 && nyk.maar.length<6){ nyk.maar.push(s); nyk.esim.push(""); }
+    } else if(/^#:/.test(r) && nyk.maar.length && !nyk.esim[nyk.maar.length-1]){
+      nyk.esim[nyk.maar.length-1] = siistiWiki(r.replace(/^#:+/,""));
+    }
+  }
+  const tulos = ryhmat.filter(x=>x.maar.length);
+  if(!tulos.length) return null;
+  if(tulos.every(g=>g.maar.every(m=>/taivutusmuoto|monikko|yksikön|genetiivi|partitiivi/i.test(m) && m.length<60))) return null;
+  return {ryhmat:tulos.slice(0,3), kuva};
+}
+const SANALUOKKA_EN = /^(Noun|Verb|Adjective|Adverb|Pronoun|Preposition|Conjunction|Interjection|Proper noun|Phrase|Idiom|Prepositional phrase|Numeral|Determiner|Particle|Proverb)$/;
+function jasennaSanaEn(wt){
+  const rivit = wt.split("\n");
+  const a = rivit.findIndex(r=>/^==\s*English\s*==\s*$/.test(r));
+  if(a<0) return null;
+  let b = rivit.findIndex((r,n)=>n>a && /^==[^=].*[^=]==\s*$/.test(r)); if(b<0) b=rivit.length;
+  const ryhmat=[]; let nyk=null, kuva=null;
+  for(const r of rivit.slice(a+1,b)){
+    const km = r.match(/\[\[(?:File|Image):([^|\]]+)/i); if(km && !kuva) kuva = km[1].trim();
+    const h = r.match(/^(={3,5})\s*([^=]+?)\s*\1\s*$/);
+    if(h){
+      if(SANALUOKKA_EN.test(h[2])){ nyk={luokka:h[2], maar:[], esim:[]}; ryhmat.push(nyk); } else nyk=null;
+      continue;
+    }
+    if(!nyk) continue;
+    if(/^#[^:*#]/.test(r)){
+      const s = siistiWiki(r.slice(1));
+      if(s.length>1 && nyk.maar.length<5){ nyk.maar.push(s); nyk.esim.push(""); }
+    } else if(/^#:/.test(r) && nyk.maar.length && !nyk.esim[nyk.maar.length-1]){
+      const ux = r.match(/\{\{(?:ux|uxi|usex)\|en\|([^|}]*)/);
+      if(ux) nyk.esim[nyk.maar.length-1] = siistiWiki(ux[1]);
+    }
+  }
+  const tulos = ryhmat.filter(x=>x.maar.length);
+  return tulos.length ? {ryhmat:tulos.slice(0,3), kuva} : null;
+}
+
+async function sanatTietoineen(sanat){
+  const j = await getJSON(API.wikt(KIELI)+"&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(sanat.slice(0,25).join("|")));
+  const jasenna = KIELI==="en" ? jasennaSanaEn : jasennaSanaFi;
+  const tulos = [];
+  for(const p of (j.query.pages||[])){
+    const s = jasenna(wikitext(p));
+    if(s && !SOPIMATON.test(p.title) && !s.ryhmat.some(g=>g.maar.some(m=>SOPIMATON.test(m)))) tulos.push({sana:p.title, ...s});
+  }
+  return tulos;
+}
+
+async function haeSana(){
+  for(let y=0;y<4;y++){
+    const ehdokkaat = (await satunnaisetSanat(4)).filter(s=>!nahty.has("sana",s));
+    if(!ehdokkaat.length) continue;
+    const tiedot = shuffle(await sanatTietoineen(ehdokkaat.slice(0,12)));
+    // suositaan sanoja, joilla on kuva, useampi merkitys, esimerkkilauseita ja kunnon selitys
+    const arvo = x => {
+      const maar = x.ryhmat.flatMap(g=>g.maar), esim = x.ryhmat.flatMap(g=>g.esim).filter(Boolean);
+      const pituus = maar.reduce((a,m)=>a+m.length,0)/maar.length;
+      return (x.kuva?3:0) + Math.min(maar.length,4) + Math.min(esim.length,2) + (pituus>=25?2:0) - (pituus<15?3:0);
+    };
+    tiedot.sort((a,b)=>arvo(b)-arvo(a));
+    const s = tiedot[0];
+    if(!s) continue;
+    nahty.add("sana",s.sana);
+    const [paakuva, muut] = await Promise.all([
+      s.kuva ? tiedostonKuva(s.kuva).catch(()=>null) : null,
+      artikkelinKuvat(API.wiki(KIELI), s.sana, 8)
+    ]);
+    const kuvat = yhdistaKuvat([[paakuva], muut], 8);
+    return {
+      tyyppi:"sana", kieli:KIELI, otsikko:s.sana, ryhmat:s.ryhmat, kuvat, kuva:kuvat[0]||null,
+      lahde:{nimi:KIELI==="fi"?"Wikisanakirja":"Wiktionary", url:"https://"+KIELI+".wiktionary.org/wiki/"+urlOsa(s.sana)}
+    };
+  }
+  throw new Error("sana");
+}
+
+/* =========================================================
+   HAKU: Päivän auto ja Päivän lentokone (Wikipedian vuosiluokat)
+   ========================================================= */
+const AUTOT_VARALLA = ["Volkswagen Golf","Toyota Corolla","Ford Mustang","Porsche 911","Volvo Amazon","Saab 900","Mercedes-Benz W124","Tesla Model S","Lada Niva","Citroën 2CV","Fiat 500","Volkswagen Beetle","Mini (Mark I)","Land Rover Defender","Mazda MX-5","Toyota Land Cruiser","Audi Quattro","BMW M3","Renault 4","Nissan Skyline GT-R","Datsun 240Z","Chevrolet Corvette","Opel Kadett","Saab 99","Peugeot 205","Honda Civic","Subaru Impreza WRX","Škoda Octavia","Volvo 240","Toyota Hilux"];
+const LAJIT = {
+  auto: {
+    luokka: v => "Category:Cars introduced in "+v, vuodet:[1946,3], minPituus:7000, chip:"esitelty",
+    infobox: /\{\{\s*Infobox (automobile|car|vehicle)/i,
+    kentat: [["manufacturer","Valmistaja","Manufacturer"],["production","Valmistettu","Production"],["model_years","Mallivuodet","Model years"],["assembly","Kokoonpano","Assembly"],
+             ["designer","Suunnittelija","Designer"],["class","Luokka","Class"],["body_style","Korimallit","Body style"],["layout","Voimansiirto","Layout"],
+             ["engine","Moottorit","Engine"],["power","Teho","Power"],["transmission","Vaihteisto","Transmission"],["length","Pituus","Length"],["weight","Paino","Weight"],
+             ["predecessor","Edeltäjä","Predecessor"],["successor","Seuraaja","Successor"]]
+  },
+  lentokone: {
+    luokka: v => "Category:Aircraft first flown in "+v, vuodet:[1910,3], minPituus:10000, chip:"ensilento",
+    infobox: /\{\{\s*Infobox aircraft/i,
+    kentat: [["type","Tyyppi","Type"],["aircraft_type","Tyyppi","Type"],["national_origin","Alkuperämaa","National origin"],["manufacturer","Valmistaja","Manufacturer"],
+             ["designer","Suunnittelija","Designer"],["first_flight","Ensilento","First flight"],["introduction","Käyttöönotto","Introduction"],["introduced","Käyttöönotto","Introduction"],
+             ["retired","Poistettu käytöstä","Retired"],["status","Tila","Status"],["primary_user","Pääkäyttäjä","Primary user"],["produced","Valmistettu","Produced"],
+             ["number_built","Valmistettu kpl","Number built"],["developed_from","Kehitetty mallista","Developed from"]]
+  }
+};
+
+function infobox(wt,re){
+  const re2 = new RegExp(re.source,"gi"), o = {};
+  let m;
+  while((m = re2.exec(wt))){
+    const a = m.index; let d=0, i=a;
+    for(; i<wt.length; i++){
+      if(wt.startsWith("{{",i)){ d++; i++; }
+      else if(wt.startsWith("}}",i)){ d--; i++; if(d===0) break; }
+    }
+    const body = wt.slice(a+2,i-1), osat=[]; let dd=0, bb=0, cur="";
+    for(let k=0;k<body.length;k++){
+      const c=body[k], n=body[k+1];
+      if(c==="{"&&n==="{"){ dd++; cur+="{{"; k++; continue; }
+      if(c==="}"&&n==="}"){ dd--; cur+="}}"; k++; continue; }
+      if(c==="["&&n==="["){ bb++; cur+="[["; k++; continue; }
+      if(c==="]"&&n==="]"){ bb--; cur+="]]"; k++; continue; }
+      if(c==="|"&&dd===0&&bb===0){ osat.push(cur); cur=""; continue; }
+      cur+=c;
+    }
+    osat.push(cur);
+    for(const p of osat.slice(1)){
+      const e=p.indexOf("="); if(e<0) continue;
+      const k=p.slice(0,e).trim().toLowerCase().replace(/ /g,"_");
+      const v=siistiWiki(p.slice(e+1).replace(/^\s*\*+\s*/,"").replace(/\n\s*\*+\s*/g,", "));
+      if(v && !(k in o)) o[k]=v;
+    }
+    re2.lastIndex = i;
+  }
+  return Object.keys(o).length ? o : null;
+}
+function lyhytArvo(v,max=130){
+  if(v.length<=max) return v;
+  const cut=v.slice(0,max), i=cut.lastIndexOf(", ");
+  return (i>40?cut.slice(0,i):cut.replace(/\s+\S*$/,""))+" …";
+}
+async function merkittavat(titles,minPituus){
+  const valinta = shuffle(titles).slice(0,45);
+  const j = await getJSON(API.wiki("en")+"&prop=info|pageimages&piprop=name&titles="+encodeURIComponent(valinta.join("|")));
+  return (j.query.pages||[]).filter(p=>!p.missing && p.length>=minPituus && p.pageimage).map(p=>p.title);
+}
+
+async function kulkuneuvo(laji,enNimi){
+  const L = LAJIT[laji], fi = KIELI==="fi";
+  const [enSum, wtj, llj, kuvat] = await Promise.all([
+    summary("en",enNimi).catch(()=>null),
+    getJSON(API.wiki("en")+"&redirects=1&prop=revisions&rvprop=content&rvslots=main&rvsection=0&titles="+encodeURIComponent(enNimi)).catch(()=>null),
+    fi ? getJSON(API.wiki("en")+"&redirects=1&prop=langlinks&lllang=fi&titles="+encodeURIComponent(enNimi)).catch(()=>null) : null,
+    artikkelinKuvat(API.wiki("en"), enNimi, 10)
+  ]);
+  let fiSum = null;
+  const ln = llj && llj.query.pages[0] && llj.query.pages[0].langlinks;
+  if(ln && ln[0]) fiSum = await summary("fi",ln[0].title).catch(()=>null);
+  const d = (fiSum && fiSum.extract && fiSum.extract.length>80) ? fiSum : enSum;
+  if(!d || !d.extract || d.extract.length<80 || d.type==="disambiguation") return null;
+  const ib = wtj ? infobox(wikitext(wtj.query.pages[0]), L.infobox) : null;
+  const tiedot = [];
+  if(ib) for(const [k,nfi,nen] of L.kentat){ const n = fi?nfi:nen; if(ib[k] && !tiedot.some(t=>t[0]===n)) tiedot.push([n,lyhytArvo(ib[k])]); }
+  const kaikki = yhdistaKuvat([[kuvaRestista(enSum), kuvaRestista(fiSum)], kuvat], 10);
+  return {
+    tyyppi:laji, kieli:KIELI, otsikko:d.title, teksti:lyhenna(d.extract,700),
+    tiedot:tiedot.slice(0,10), kuvat:kaikki, kuva:kaikki[0]||null,
+    lahde:{nimi: (fi && d!==fiSum) ? "Wikipedia (englanniksi)" : "Wikipedia", url:d.content_urls.desktop.page}
+  };
+}
+
+async function haeKulkuneuvo(laji){
+  const L = LAJIT[laji], vuosiNyt = new Date().getFullYear();
+  for(let y=0;y<5;y++){
+    try{
+      const vuosi = L.vuodet[0] + Math.floor(Math.random()*(vuosiNyt-L.vuodet[1]-L.vuodet[0]+1));
+      const cm = await getJSON(API.wiki("en")+"&list=categorymembers&cmtype=page&cmnamespace=0&cmlimit=500&cmtitle="+encodeURIComponent(L.luokka(vuosi)));
+      const kaikki = cm.query.categorymembers.map(m=>m.title).filter(t=>!/^List of/i.test(t) && !nahty.has(laji,t));
+      if(!kaikki.length) continue;
+      const hyvat = await merkittavat(kaikki, L.minPituus).catch(()=>[]);
+      const nimi = pick(hyvat.length ? hyvat : kaikki);
+      const item = await kulkuneuvo(laji,nimi);
+      if(!item) continue;
+      nahty.add(laji,nimi);
+      item.vuosi = vuosi; item.chipAvain = L.chip;
+      return item;
+    }catch(e){}
+  }
+  if(laji==="auto"){
+    for(const nimi of shuffle(AUTOT_VARALLA.filter(x=>!nahty.has("auto",x))).slice(0,3)){
+      try{ const item = await kulkuneuvo("auto",nimi); if(item){ nahty.add("auto",nimi); return item; } }catch(e){}
+    }
+  }
+  throw new Error(laji);
+}
+const haeAuto = () => haeKulkuneuvo("auto");
+const haeLentokone = () => haeKulkuneuvo("lentokone");
+
+/* =========================================================
+   HAKU: Päivän pääkaupunki / kaupunki (Wikidata + Wikipedia + kartta)
+   ========================================================= */
+const KYSELYT = {
+  paakaupunki: "SELECT ?maa ?kaupunki ?fiArt ?enArt WHERE { ?maa wdt:P31 wd:Q3624078; wdt:P36 ?kaupunki. FILTER NOT EXISTS { ?maa wdt:P576 [] } ?fiArt schema:about ?kaupunki; schema:isPartOf <https://fi.wikipedia.org/>. ?enArt schema:about ?kaupunki; schema:isPartOf <https://en.wikipedia.org/>. }",
+  kaupunki: "SELECT ?maa ?kaupunki ?fiArt ?enArt WHERE { ?kaupunki wdt:P31 wd:Q515; wdt:P1082 ?asukkaat; wdt:P17 ?maa. FILTER(?asukkaat > 400000) ?fiArt schema:about ?kaupunki; schema:isPartOf <https://fi.wikipedia.org/>. ?enArt schema:about ?kaupunki; schema:isPartOf <https://en.wikipedia.org/>. }"
+};
+async function kaupunkiLista(tila){
+  const avain = "kaupungit-"+tila;
+  const c = store.get(avain,null);
+  if(c && Date.now()-c.aika < 30*864e5 && c.rivit && c.rivit.length>100) return c.rivit;
+  const j = await getJSON("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(KYSELYT[tila]), 30000);
+  const art = v => { let a = v.split("/wiki/")[1]; try{ a = decodeURIComponent(a); }catch(e){} return a.replace(/_/g," "); };
+  const rivit = [], nahdyt = new Set();
+  for(const b of j.results.bindings){
+    const k = b.kaupunki.value.split("/").pop();
+    if(nahdyt.has(k)) continue; nahdyt.add(k);
+    rivit.push({maa:b.maa.value.split("/").pop(), kaupunki:k, fi:art(b.fiArt.value), en:art(b.enArt.value)});
+  }
+  store.set(avain,{aika:Date.now(),rivit});
+  return rivit;
+}
+function wdArvot(ent,p){
+  return ((ent && ent.claims && ent.claims[p])||[])
+    .filter(x=>x.mainsnak && x.mainsnak.datavalue && x.rank!=="deprecated")
+    .sort((a,b)=>(b.rank==="preferred")-(a.rank==="preferred"))
+    .map(x=>x.mainsnak.datavalue.value);
+}
+const wdNimi = ent => { if(!ent || !ent.labels) return ""; const l = ent.labels[KIELI] || ent.labels.en || ent.labels.fi; return l ? l.value : ""; };
+const luku = v => v && v.amount ? Math.round(+v.amount).toLocaleString(lokaali()) : "";
+
+async function haePaakaupunki(){
+  const tila = PK_TILA, rivit = await kaupunkiLista(tila);
+  let vapaat = rivit.filter(r=>!nahty.has(tila,r.kaupunki));
+  if(!vapaat.length){ nahty.nollaaAihe(tila); vapaat = rivit; }
+  for(const r of shuffle(vapaat).slice(0,3)){
+    try{
+      const artikkeli = KIELI==="fi" ? r.fi : r.en;
+      const [e, d, kuvat] = await Promise.all([
+        getJSON(API.wikidata()+"&props=labels|claims&ids="+r.maa+"|"+r.kaupunki),
+        summary(KIELI, artikkeli),
+        artikkelinKuvat(API.wiki(KIELI), artikkeli, 10)
+      ]);
+      const maa = e.entities[r.maa], kau = e.entities[r.kaupunki];
+      const osat = wdArvot(maa,"P30").slice(0,2), kielet = wdArvot(maa,"P37").slice(0,3), valuutat = wdArvot(maa,"P38").slice(0,1);
+      const ids = [...osat,...kielet,...valuutat].map(v=>v.id).filter(Boolean);
+      const nimet = {};
+      if(ids.length){
+        const l = await getJSON(API.wikidata()+"&props=labels&ids="+ids.join("|")).catch(()=>null);
+        if(l) for(const id of ids) nimet[id] = wdNimi(l.entities[id]);
+      }
+      const nim = lista => [...new Set(lista.map(v=>nimet[v.id]).filter(Boolean).map(isoAlku))].join(", ");
+      const lippu = wdArvot(maa,"P41")[0];
+      const pinta = luku(wdArvot(maa,"P2046")[0]);
+      const korkeus = wdArvot(kau,"P2044")[0];
+      const koord = wdArvot(kau,"P625")[0];
+      const tiedot = [
+        [T("maa"), wdNimi(maa)], [T("maanosa"), nim(osat)],
+        [T("asukasluku"), luku(wdArvot(kau,"P1082")[0])],
+        [T("korkeus"), korkeus && korkeus.amount ? Math.round(+korkeus.amount)+" m" : ""],
+        [T("maan_asukasluku"), luku(wdArvot(maa,"P1082")[0])],
+        [T("pinta_ala"), pinta ? pinta+" km²" : ""],
+        [T("kieli"), nim(kielet)], [T("valuutta"), nim(valuutat)]
+      ].filter(t=>t[1]);
+      nahty.add(tila,r.kaupunki);
+      const kaikki = yhdistaKuvat([[kuvaRestista(d)], kuvat], 10);
+      return {
+        tyyppi:"paakaupunki", tila, kieli:KIELI, otsikko:wdNimi(kau)||d.title, maa:wdNimi(maa),
+        lippu: lippu ? "https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(lippu)+"?width=80" : null,
+        koord: koord ? {lat:koord.latitude, lon:koord.longitude} : null,
+        teksti:lyhenna(d.extract,700), tiedot, kuvat:kaikki, kuva:kaikki[0]||null,
+        lahde:{nimi:"Wikipedia", url:d.content_urls.desktop.page}
+      };
+    }catch(e){}
+  }
+  throw new Error("paakaupunki");
+}
+
+/* =========================================================
+   HAKU: Yleistieto (satunnainen Wikipedia-artikkeli)
+   ========================================================= */
+async function haeTieto(){
+  for(let y=0;y<3;y++){
+    const tulokset = await Promise.all([0,1,2].map(()=>getJSON("https://"+KIELI+".wikipedia.org/api/rest_v1/page/random/summary").catch(()=>null)));
+    const hyvat = tulokset.filter(d=>d && d.type==="standard" && d.extract && d.extract.length>200 && !nahty.has("tieto",d.title));
+    if(!hyvat.length) continue;
+    const d = hyvat.find(x=>x.thumbnail) || hyvat[0];
+    nahty.add("tieto",d.title);
+    const kuvat = yhdistaKuvat([[kuvaRestista(d)], await artikkelinKuvat(API.wiki(KIELI), d.title, 10)], 10);
+    return {tyyppi:"tieto", kieli:KIELI, otsikko:d.title, teksti:lyhenna(d.extract,800), kuvat, kuva:kuvat[0]||null,
+            lahde:{nimi:"Wikipedia", url:d.content_urls.desktop.page}};
+  }
+  throw new Error("tieto");
+}
+
+/* =========================================================
+   HAKU: Päivän vitsi
+   fi: Wikikirjaston Vitsikirja, en: icanhazdadjoke.com
+   ========================================================= */
+const VITSISIVUT = ["Vitsikirja/Autot","Vitsikirja/Basistit","Vitsikirja/Eläimellistä menoa","Vitsikirja/Ennätyksiä nämäkin","Vitsikirja/Ikä ei tule yksin","Vitsikirja/Insinöörit","Vitsikirja/Kekkoskaskut","Vitsikirja/Laihialaisvitsit","Vitsikirja/Lampunvaihto","Vitsikirja/Lääkärit","Vitsikirja/Maakuntamatkailua","Vitsikirja/Nonsense","Vitsikirja/Pikku-Kalle","Vitsikirja/Sekalaiset","Vitsikirja/Suomalainen, ruotsalainen ja norjalainen","Vitsikirja/Turkulaiset","Vitsikirja/Työn iloa","Vitsikirja/Viisastelua","Wikijunior Vitsikirja/Pikku-Kalle","Wikijunior Vitsikirja/Puujalkavitsejä","Wikijunior Vitsikirja/Sekalaiset","Wikijunior Vitsikirja/Suomalainen, ruotsalainen ja norjalainen","Wikijunior Vitsikirja/Tohtori"];
+const SOPIMATON_VITSI = /aviorikos|pettä|rakastaja|vieraissa|humal|kapak|viina|kalja|krapula|alasti|alaston|tissi|rinnat|lihava|mustalai|neeke|homo|hullu|mielisair|psykiatr|sänky|sängy|seks|perse|paska|vittu|huor|raisk|kuoll|tappo|murha|itsemurh|\bsex|nude|naked|drunk|beer|vodka|whisky|\bfat\b|\bgay\b|kill|dead|die\b|boob|butt|fuck|shit|\bhell\b|damn|girlfriend|boyfriend|sexy|wife|husband/i;
+let vitsiVarasto = null;
+
+function jasennaVitsit(wt){
+  return wt.split(/^-{4,}\s*$/m).map(osa=>{
+    const t = osa.replace(/<br\s*\/?>/gi,"\n").replace(/\[\[(?:Luokka|Category):[^\]]*\]\]/gi,"");
+    return t.split("\n").map(r=>r.trim())
+      .filter(r=>r && !/^=+.*=+$/.test(r) && !/^\{\{|^\}\}|^__|^<\/?(center|table|tr|td|div)/i.test(r))
+      .map(r=>siistiWiki(r)).filter(Boolean).join("\n");
+  }).filter(t=>t.length>=25 && t.length<=900 && !/vitsi on|vitsikantamme|tarkoitus on koota/i.test(t) && !SOPIMATON_VITSI.test(t));
+}
+async function haeVitsiFi(){
+  if(!vitsiVarasto){
+    const j = await getJSON(API.books+"&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(VITSISIVUT.join("|")), 15000);
+    const nahdyt = new Set(); vitsiVarasto = [];
+    for(const p of (j.query.pages||[])){
+      for(const t of jasennaVitsit(wikitext(p))){
+        const a = t.slice(0,60).toLowerCase(); if(nahdyt.has(a)) continue; nahdyt.add(a);
+        vitsiVarasto.push({t, sivu:p.title});
+      }
+    }
+  }
+  if(!vitsiVarasto.length) throw new Error("vitsi");
+  let vapaat = vitsiVarasto.filter(v=>!nahty.has("vitsi",v.t.slice(0,80)));
+  if(!vapaat.length){ nahty.nollaaAihe("vitsi"); vapaat = vitsiVarasto; }
+  const v = pick(vapaat);
+  nahty.add("vitsi",v.t.slice(0,80));
+  return {
+    tyyppi:"vitsi", kieli:"fi", otsikko:v.t.split("\n")[0].slice(0,100), teksti:v.t,
+    lahde:{nimi:"Wikikirjasto, "+v.sivu.replace(/\//," / "), url:"https://fi.wikibooks.org/wiki/"+urlOsa(v.sivu)}
+  };
+}
+async function haeVitsiEn(){
+  for(let y=0;y<6;y++){
+    const j = await getJSON("https://icanhazdadjoke.com/",10000,{Accept:"application/json"});
+    if(!j || !j.joke || nahty.has("vitsi",j.id) || SOPIMATON_VITSI.test(j.joke)) continue;
+    nahty.add("vitsi",j.id);
+    // kysymys ja vastaus omille riveilleen
+    const teksti = j.joke.replace(/\?\s+/,"?\n").trim();
+    return {tyyppi:"vitsi", kieli:"en", otsikko:teksti.split("\n")[0].slice(0,100), teksti,
+            lahde:{nimi:"icanhazdadjoke.com", url:"https://icanhazdadjoke.com/j/"+j.id}};
+  }
+  throw new Error("vitsi");
+}
+const haeVitsi = () => KIELI==="en" ? haeVitsiEn() : haeVitsiFi();
+
+/* =========================================================
+   HAKU: Päivän mietelause
+   fi: Wikisitaattien viikon sitaatit ja ajattelijoiden sivut
+   en: englanninkielisen Wikiquoten "Quote of the day" -arkisto
+   ========================================================= */
+const AJATTELIJAT = ["Albert Einstein","Michel de Montaigne","Benjamin Franklin","Khalil Gibran","Seneca","Kungfutse","Aristoteles","Johann Wolfgang von Goethe","Tove Jansson","Aleksis Kivi","Mark Twain","Oscar Wilde","Marcus Aurelius","Sokrates","Platon","Epiktetos","Friedrich Nietzsche","Leo Tolstoi","Abraham Lincoln","Blaise Pascal","Voltaire","Søren Kierkegaard","Arthur Schopenhauer","Ralph Waldo Emerson","Henry David Thoreau","Antoine de Saint-Exupéry","Astrid Lindgren","Eino Leino","J. V. Snellman","Johan Ludvig Runeberg","Zachris Topelius","Väinö Linna","Jean Sibelius","Isaac Newton","Leonardo da Vinci","Helen Keller","Thomas Edison"];
+let viikonSitaatit = null;
+const vieraskieli = t => (t.match(/\b(the|and|of|is|you|to|in|que|est|les|und|der|die|das|nicht|non|et|le|la)\b/gi)||[]).length>=2 && !/[äö]/i.test(t);
+const ilmanLainausmerkkeja = t => {
+  t = t.replace(/\s*\[[^\]]{1,60}\]\s*$/,"").replace(/^["“”„«»'’\s]+|["“”„«»'’\s,;]+$/g,"").trim();
+  // pariton sisempi lainausmerkki pois
+  if((t.match(/[”“"]/g)||[]).length===1) t = t.replace(/[”“"]/,"");
+  return t;
+};
+const SOPIMATON_LAUSE = /sängy|seks|biseks|alastom|huor|raisk|porno|vittu|paska|perse|kyrp|pillu|natsi|murha|itsemurh|\bsex|whore|fuck|shit|\brape|porn|nazi|suicid|murder/i;
+
+async function viikonSitaatti(){
+  if(!viikonSitaatit){
+    let kaikki=[], cont="";
+    for(let k=0;k<3;k++){
+      const a = await getJSON(API.quote("fi")+"&list=allpages&apnamespace=10&apprefix="+encodeURIComponent("Viikon sitaatti/")+"&aplimit=500"+cont);
+      kaikki = kaikki.concat(a.query.allpages.map(x=>x.title));
+      if(!a.continue) break;
+      cont = "&apcontinue="+encodeURIComponent(a.continue.apcontinue);
+    }
+    viikonSitaatit = kaikki;
+  }
+  const valinta = shuffle(viikonSitaatit).slice(0,10);
+  const j = await getJSON(API.quote("fi")+"&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(valinta.join("|")));
+  for(const p of shuffle(j.query.pages||[])){
+    const t = siistiWiki(wikitext(p));
+    if(!t) continue;
+    const m = t.match(/^(.*\S)\s*(?:[–—]|\s-)\s*([^–—]{2,90})$/);
+    let lause = m ? m[1] : t; const tekija = m ? m[2].trim() : "";
+    lause = ilmanLainausmerkkeja(lause);
+    if(!tekija || /tyhjennetty|mallinesivu|^\(|^[^"”:]{3,40}:\s/i.test(lause) || SOPIMATON_LAUSE.test(lause) || lause.length<20 || lause.length>380 || nahty.has("mietelause",lause.slice(0,80))) continue;
+    return {lause, tekija, sivu:"https://fi.wikiquote.org/wiki/"+urlOsa(p.title), sivuNimi:"Wikisitaatit, viikon sitaatti"};
+  }
+  return null;
+}
+async function ajattelijanSitaatti(){
+  const nimi = pick(AJATTELIJAT);
+  const j = await getJSON(API.quote("fi")+"&redirects=1&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(nimi));
+  const p = j.query.pages[0], wt = wikitext(p);
+  if(!wt) return null;
+  const rivit = wt.split("\n"), ehdokkaat = [];
+  let mukana = true;
+  rivit.forEach((r,n)=>{
+    if(/^==/.test(r)){ mukana = !/lähte|aiheesta muualla|katso myös|virheellis|kiistanalai|hänestä|muiden sanomaa|kirjallisuutta|viitteet/i.test(r); return; }
+    if(!mukana || !/^\*(?![*:])/.test(r)) return;
+    let lause = siistiWiki(r.replace(/^\*\s*/,""));
+    if(vieraskieli(lause) && /^\*\*/.test(rivit[n+1]||"")) lause = siistiWiki(rivit[n+1].replace(/^\*+\s*/,""));
+    lause = ilmanLainausmerkkeja(lause);
+    if(lause.length<25 || lause.length>320 || vieraskieli(lause) || SOPIMATON_LAUSE.test(lause) || /https?:|www\./.test(lause) || nahty.has("mietelause",lause.slice(0,80))) return;
+    ehdokkaat.push(lause);
+  });
+  if(!ehdokkaat.length) return null;
+  return {lause:pick(ehdokkaat), tekija:p.title, sivu:"https://fi.wikiquote.org/wiki/"+urlOsa(p.title), sivuNimi:"Wikisitaatit"};
+}
+const KUUKAUDET = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+async function paivanSitaattiEn(){
+  // arvotaan 12 päivämäärää vuosilta 2012–(edellinen vuosi) ja haetaan ne yhdellä kyselyllä
+  const viimeinen = new Date().getFullYear()-1, otsikot = [];
+  for(let i=0;i<12;i++){
+    const v = 2012+Math.floor(Math.random()*(viimeinen-2012+1)), kk = Math.floor(Math.random()*12), pv = 1+Math.floor(Math.random()*28);
+    otsikot.push("Wikiquote:Quote of the day/"+KUUKAUDET[kk]+" "+pv+", "+v);
+  }
+  const j = await getJSON(API.quote("en")+"&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(otsikot.join("|")));
+  for(const p of shuffle(j.query.pages||[])){
+    const wt = wikitext(p); if(!wt) continue;
+    const q = wt.match(/\|\s*quote\s*=\s*([\s\S]*?)\n\s*\|\s*author\s*=\s*([^\n|}]*)/i);
+    if(!q) continue;
+    const lause = ilmanLainausmerkkeja(siistiWiki(q[1].replace(/<br\s*\/?>/gi," ").replace(/\n/g," ")));
+    const tekija = siistiWiki(q[2]);
+    if(!tekija || lause.length<20 || lause.length>380 || SOPIMATON_LAUSE.test(lause) || nahty.has("mietelause",lause.slice(0,80))) continue;
+    return {lause, tekija, sivu:"https://en.wikiquote.org/wiki/"+urlOsa(p.title), sivuNimi:"Wikiquote, Quote of the day"};
+  }
+  return null;
+}
+async function haeMietelause(){
+  for(let y=0;y<5;y++){
+    let s = null;
+    if(KIELI==="en"){ try{ s = await paivanSitaattiEn(); }catch(e){} }
+    else{
+      try{ s = (y%2===0 && Math.random()<0.5) ? await viikonSitaatti() : await ajattelijanSitaatti(); }catch(e){}
+      if(!s){ try{ s = await viikonSitaatti(); }catch(e){} }
+    }
+    if(!s) continue;
+    nahty.add("mietelause",s.lause.slice(0,80));
+    return {tyyppi:"mietelause", kieli:KIELI, otsikko:s.lause, tekija:s.tekija, lahde:{nimi:s.sivuNimi, url:s.sivu}};
+  }
+  throw new Error("mietelause");
+}
+
+const HAKU = {sana:haeSana, auto:haeAuto, lentokone:haeLentokone, paakaupunki:haePaakaupunki, tieto:haeTieto, vitsi:haeVitsi, mietelause:haeMietelause};
+
+/* =========================================================
+   PIIRTÄMINEN
+   ========================================================= */
+// Kuvagalleria: nuolet, laskuri, nuolinäppäimet ja pyyhkäisy
+function teeGalleria(kuvat,alt,sailio){
+  const lista = kuvat.slice();
+  let i = 0;
+  const fig = el("figure",null,"gal"), stage = el("div",null,"stage");
+  const a = link("",""), im = el("img");
+  a.title = T("kuvan_sivu"); a.append(im); stage.append(a);
+  const ed = nappi("‹","nav prev",()=>nayta(i-1),T("ed_kuva")), se = nappi("›","nav next",()=>nayta(i+1),T("seur_kuva"));
+  const laskuri = el("span","","count");
+  stage.append(ed,se,laskuri);
+  const cap = el("figcaption");
+  fig.append(stage,cap);
+
+  function napit(){ const monta = lista.length>1; ed.hidden = se.hidden = laskuri.hidden = !monta; }
+  function nayta(n){
+    i = (n+lista.length)%lista.length;
+    const k = lista[i];
+    im.src = k.src; im.alt = alt+(lista.length>1 ? ", "+(i+1)+"/"+lista.length : "");
+    a.href = k.sivu; a.setAttribute("aria-label",T("kuvan_sivu")+": "+alt);
+    cap.replaceChildren(T("kuva"));
+    if(k.tekija) cap.append(k.tekija+" / ");
+    cap.append(link(k.sivu, /commons/.test(k.sivu)?"Wikimedia Commons":"Wikipedia"));
+    if(k.lisenssi) cap.append(", "+k.lisenssi);
+    laskuri.textContent = (i+1)+" / "+lista.length;
+    if(lista.length>1){ const esi = new Image(); esi.src = lista[(i+1)%lista.length].src; }
+  }
+  im.onerror = ()=>{
+    const k = lista[i];
+    if(k && k.varasrc && im.src!==k.varasrc){ im.src = k.varasrc; return; }
+    lista.splice(i,1);
+    if(!lista.length){ fig.remove(); if(sailio && !sailio.querySelector(".kartta")){ const o=sailio.parentNode; sailio.remove(); if(o) o.classList.remove("has-img"); } return; }
+    napit(); nayta(i>=lista.length ? 0 : i);
+  };
+  fig.addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft"){ nayta(i-1); e.preventDefault(); }
+    if(e.key==="ArrowRight"){ nayta(i+1); e.preventDefault(); }
+  });
+  let x0 = null;
+  stage.addEventListener("touchstart",e=>{ x0 = e.touches[0].clientX; },{passive:true});
+  stage.addEventListener("touchend",e=>{
+    if(x0==null) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if(Math.abs(dx)>40 && lista.length>1) nayta(i + (dx<0?1:-1));
+  });
+  napit(); nayta(0);
+  return fig;
+}
+// OpenStreetMap-kartta kaupungin sijainnista (ei vaadi avainta)
+function teeKartta(koord,nimi){
+  const {lat,lon} = koord, dLon = 0.35, dLat = 0.2;
+  const f = el("figure",null,"kartta"), ifr = el("iframe");
+  ifr.title = T("kartta")+": "+nimi; ifr.loading = "lazy";
+  ifr.src = "https://www.openstreetmap.org/export/embed.html?bbox="+[lon-dLon,lat-dLat,lon+dLon,lat+dLat].map(v=>v.toFixed(4)).join("%2C")+"&layer=mapnik&marker="+lat.toFixed(5)+"%2C"+lon.toFixed(5);
+  const cap = el("figcaption");
+  cap.append("© ", link("https://www.openstreetmap.org/copyright","OpenStreetMap"), " · ",
+             link("https://www.openstreetmap.org/?mlat="+lat.toFixed(5)+"&mlon="+lon.toFixed(5)+"#map=11/"+lat.toFixed(4)+"/"+lon.toFixed(4), T("kartta_iso")));
+  f.append(ifr,cap);
+  return f;
+}
+function lahdeRivi(item, lisa){
+  const s = el("p",null,"src");
+  s.append(T("lahde"), link(item.lahde.url,item.lahde.nimi));
+  if(lisa) s.append(lisa);
+  return s;
+}
+function tietotaulu(tiedot){
+  const dl = el("dl",null,"facts");
+  tiedot.forEach(([k,v])=>{ dl.append(el("dt",k), el("dd",v)); });
+  return dl;
+}
+
+function piirraSana(out,item,tiivis){
+  out.append(el("p",item.otsikko,"big"));
+  for(const g of item.ryhmat.slice(0, tiivis?1:3)){
+    out.append(el("p",g.luokka,"wclass"));
+    const ol = el("ol",null,"defs");
+    g.maar.slice(0, tiivis?3:6).forEach((m,i)=>{
+      const li = el("li",m);
+      if(!tiivis && g.esim[i]) li.append(el("span",T("esim")+g.esim[i],"esim"));
+      ol.append(li);
+    });
+    out.append(ol);
+  }
+  out.append(lahdeRivi(item));
+}
+function piirraKulkuneuvo(out,item,tiivis){
+  out.append(el("p",item.otsikko,"big"));
+  const chipTeksti = item.chipAvain ? T(item.chipAvain)+item.vuosi : item.chip;
+  if(chipTeksti){ const c=el("div",null,"chips"); c.append(el("span",chipTeksti,"chip")); out.append(c); }
+  out.append(el("p",tiivis ? lyhenna(item.teksti,300) : item.teksti, tiivis?"tiivis":""));
+  if(!tiivis && item.tiedot && item.tiedot.length) out.append(tietotaulu(item.tiedot));
+  out.append(lahdeRivi(item, !tiivis && item.kieli!=="en" && item.tiedot && item.tiedot.length ? TEKSTIT.fi.tekniset_en : ""));
+}
+function piirraPaakaupunki(out,item,tiivis){
+  out.append(el("p",item.otsikko,"big"));
+  if(item.maa){
+    const c = el("div",null,"chips"), chip = el("span",null,"chip");
+    if(item.lippu){ const im = el("img"); im.src = item.lippu; im.alt = ""; im.onerror = ()=>im.remove(); chip.append(im); }
+    chip.append(item.maa); c.append(chip); out.append(c);
+  }
+  out.append(el("p",tiivis ? lyhenna(item.teksti,300) : item.teksti, tiivis?"tiivis":""));
+  if(!tiivis && item.tiedot && item.tiedot.length) out.append(tietotaulu(item.tiedot));
+  out.append(lahdeRivi(item, tiivis ? "" : T("luvut_wd")));
+}
+function piirraTieto(out,item,tiivis){
+  out.append(el("p",item.otsikko,"big"), el("p",tiivis ? lyhenna(item.teksti,320) : item.teksti, tiivis?"tiivis":""), lahdeRivi(item));
+}
+function piirraVitsi(out,item){
+  out.append(el("p",item.teksti,"joke"), lahdeRivi(item));
+}
+function piirraMietelause(out,item){
+  out.append(el("blockquote","”"+item.otsikko+"”","quote"));
+  if(item.tekija) out.append(el("p","— "+item.tekija,"who"));
+  out.append(lahdeRivi(item));
+}
+const PIIRRA = {sana:piirraSana, auto:piirraKulkuneuvo, lentokone:piirraKulkuneuvo, paakaupunki:piirraPaakaupunki, tieto:piirraTieto, vitsi:piirraVitsi, mietelause:piirraMietelause};
+
+// Piirtää kohteen annettuun säiliöön. tiivis = ruudukon pieni ruutu.
+function piirraSisalto(out,item,tiivis){
+  out.replaceChildren(); out.className = "out";
+  const kuvat = item.kuvat || (item.kuva ? [item.kuva] : []);
+  const media = el("div",null,"media");
+  if(kuvat.length) media.append(teeGalleria(kuvat, item.otsikko, media));
+  if(!tiivis && item.koord) media.append(teeKartta(item.koord, item.otsikko));
+  if(media.children.length){
+    if(!tiivis) out.classList.add("has-img");
+    out.append(media);
+  }
+  PIIRRA[item.tyyppi](out,item,tiivis);
+}
+
+/* =========================================================
+   TILA JA NÄKYMÄT
+   ========================================================= */
+const tila = {
+  aihe: AIHEET.includes(store.get("valittu-aihe","sana")) ? store.get("valittu-aihe","sana") : "sana",
+  nakyma: store.get("nakyma","aihe")==="ruudukko" ? "ruudukko" : "aihe",   // "aihe" | "visa" | "suosikit" | "ruudukko"
+  item: null,
+  haussa: {},
+  ruudukko: (store.get("ruudukko-aiheet",["sana","auto","paakaupunki","mietelause"])||[]).filter(k=>AIHEET.includes(k)).slice(0,4)
+};
+if(!tila.ruudukko.length) tila.ruudukko = ["sana"];
+
+function korttiTeksti(k,item){
+  if(k==="mietelause") return "”"+item.otsikko+"”";
+  if(k==="paakaupunki" && item.maa) return item.otsikko+", "+item.maa;
+  if(k==="vitsi") return item.otsikko.replace(/^[–-]\s*/,"");
+  return item.otsikko;
+}
+function teeKortit(){
+  const c = $("cards"); c.replaceChildren(); c.setAttribute("aria-label",T("aiheet"));
+  for(const k of AIHEET){
+    const b = nappi(null,"card",()=>valitseAihe(k));
+    b.id="card-"+k; b.setAttribute("role","tab"); b.setAttribute("aria-label",NIMI(k));
+    const txt = el("span",null,"txt");
+    txt.append(el("span",LYHYT(k),"lbl"), el("span",T("haetaan"),"prev wait"));
+    b.append(txt); c.append(b);
+  }
+  paivitaKortit();
+}
+function paivitaKortit(){
+  for(const k of AIHEET){
+    const b = $("card-"+k); if(!b) continue;
+    b.setAttribute("aria-selected", String(tila.nakyma!=="suosikit" && tila.nakyma!=="ruudukko" && tila.aihe===k));
+    const item = paiva.get(k), prev = b.querySelector(".prev");
+    const vanha = b.querySelector("img"); if(vanha) vanha.remove();
+    if(item){
+      prev.className="prev"; prev.textContent = korttiTeksti(k,item);
+      const kuva = (item.kuvat && item.kuvat[0]) || item.kuva;
+      if(kuva){ const im = el("img"); im.alt=""; im.src=kuva.src; im.onerror=()=>im.remove(); b.insertBefore(im,b.firstChild); }
+    } else if(tila.haussa[hakuAvain(k)]==="virhe"){
+      prev.className="prev wait"; prev.textContent=T("kortti_virhe");
+    } else {
+      prev.className="prev wait"; prev.textContent=T("haetaan");
+    }
+  }
+}
+function naytaKortti(k){
+  const b = $("card-"+k), c = $("cards");
+  if(b && c.scrollWidth>c.clientWidth){
+    const vasen = b.offsetLeft - c.offsetLeft, oikea = vasen + b.offsetWidth;
+    if(vasen < c.scrollLeft || oikea > c.scrollLeft + c.clientWidth) c.scrollTo({left: Math.max(0, vasen-12), behavior:"smooth"});
+  }
+}
+
+function paivitaToiminnot(){
+  const aiheessa = tila.nakyma==="aihe";
+  const ub = $("uusiBtn");
+  ub.hidden = tila.nakyma==="suosikit";
+  if(!ub.disabled) ub.textContent = tila.nakyma==="visa" ? T("uusi_kysymys") : T("nayta_toinen");
+  $("favBtn").hidden = !aiheessa || !tila.item;
+  $("jaaBtn").hidden = !aiheessa || !tila.item;
+  $("visaBtn").hidden = !(tila.aihe==="sana" && (tila.nakyma==="aihe"||tila.nakyma==="visa"));
+  $("visaBtn").textContent = tila.nakyma==="visa" ? T("takaisin_sanaan") : T("sanavisa");
+  $("pkBtn").hidden = !(aiheessa && tila.aihe==="paakaupunki");
+  $("pkBtn").textContent = PK_TILA==="paakaupunki" ? T("kaupunkeihin") : T("paakaupunkeihin");
+  if(tila.item){
+    const on = suosikit.on(tila.item);
+    $("favBtn").textContent = on ? T("suosikeissa") : T("suosikkeihin");
+    $("favBtn").setAttribute("aria-pressed",String(on));
+  }
+  const n = suosikit.lista().length;
+  $("suosikitBtn").replaceChildren("★ ", el("span",T("suosikit")+" ","lab"), "("+n+")");
+  $("suosikitBtn").setAttribute("aria-label",T("suosikit")+" ("+n+")");
+  $("suosikitBtn").setAttribute("aria-pressed",String(tila.nakyma==="suosikit"));
+  const ruud = tila.nakyma==="ruudukko";
+  $("nakymaBtn").replaceChildren(ruud ? "▢" : "▦", el("span"," "+(ruud?T("yksi"):T("ruudukko")),"lab"));
+  $("nakymaBtn").setAttribute("aria-label", ruud?T("yksi"):T("ruudukko"));
+  $("nakymaBtn").setAttribute("aria-pressed",String(ruud));
+  $("cards").hidden = ruud;
+  $("paneeli").hidden = ruud;
+  $("rasetukset").hidden = !ruud;
+  $("ruudukko").hidden = !ruud;
+}
+
+function otsikko(teksti,merkki){
+  const h = $("otsikko"); h.replaceChildren(teksti);
+  if(merkki) h.append(el("span",merkki,"badge"));
+}
+function naytaItem(item,merkki){
+  tila.item = item;
+  piirraSisalto($("tulos"), item, false);
+  otsikko(NIMI(item.tyyppi,item), merkki);
+  paivitaToiminnot();
+}
+function naytaLataus(out,teksti){
+  out = out || $("tulos"); out.className="out";
+  out.replaceChildren(el("p",teksti||T("haetaan_netista"),"hint"));
+}
+function naytaVirhe(out,uudelleen){
+  out = out || $("tulos"); out.className="out";
+  out.replaceChildren(el("p",T("haku_epaonnistui"),"err"), nappi(T("yrita_uudelleen"),"inline",uudelleen));
+}
+
+// Päivän valinta: haetaan kerran päivässä (kielikohtaisesti) ja tallennetaan selaimeen
+const hakuAvain = k => paivaAvain(k);
+async function paivanValinta(k){
+  const valmis = paiva.get(k);
+  if(valmis) return valmis;
+  const ha = hakuAvain(k);
+  if(tila.haussa[ha] instanceof Promise) return tila.haussa[ha];
+  const kieli = KIELI, pk = PK_TILA;
+  const p = HAKU[k]().then(item=>{
+      // tallennetaan vain, jos kieli ja tila eivät vaihtuneet kesken haun
+      if(kieli===KIELI && pk===PK_TILA && !paiva.get(k)) paiva.set(k,item);
+      tila.haussa[ha]=null; return item;
+    })
+    .catch(e=>{ tila.haussa[ha]="virhe"; throw e; })
+    .finally(()=>{ paivitaKortit(); });
+  tila.haussa[ha] = p;
+  return p;
+}
+
+async function valitseAihe(k){
+  tila.aihe = k; tila.nakyma = "aihe"; store.set("valittu-aihe",k); store.set("nakyma","aihe");
+  tila.item = null; paivitaToiminnot(); paivitaKortit(); naytaKortti(k);
+  otsikko(NIMI(k),T("paivan_valinta"));
+  const valmis = paiva.get(k);
+  if(valmis){ naytaItem(valmis,T("paivan_valinta")); return; }
+  naytaLataus();
+  const kieli = KIELI;
+  try{
+    const item = await paivanValinta(k);
+    if(tila.aihe===k && tila.nakyma==="aihe" && kieli===KIELI) naytaItem(item,T("paivan_valinta"));
+  }catch(e){
+    if(tila.aihe===k && tila.nakyma==="aihe") naytaVirhe(null,()=>valitseAihe(k));
+  }
+}
+
+// "Näytä toinen" vaihtaa aiheen päivän valinnan, joten myös yläreunan kortti päivittyy
+async function naytaToinen(){
+  if(tila.nakyma==="visa") return uusiVisa();
+  const k = tila.aihe, btn = $("uusiBtn"), kieli = KIELI;
+  tila.nakyma = "aihe"; paivitaKortit();
+  btn.disabled = true; btn.textContent = T("haetaan");
+  naytaLataus(); otsikko(NIMI(k));
+  try{
+    const item = await HAKU[k]();
+    if(kieli!==KIELI) return;
+    paiva.set(k,item); paivitaKortit();
+    if(tila.aihe===k && tila.nakyma==="aihe") naytaItem(item,T("paivan_valinta"));
+  }catch(e){
+    if(tila.aihe===k) naytaVirhe(null,naytaToinen);
+  }finally{
+    btn.disabled = false; paivitaToiminnot();
+  }
+}
+
+/* ---------- Ruudukkonäkymä (1–4 aihetta) ---------- */
+function teeRuudukkoAsetukset(){
+  const r = $("rasetukset"); r.replaceChildren(el("span",T("valitse"),"ohje"));
+  for(const k of AIHEET){
+    const valittu = tila.ruudukko.includes(k);
+    const b = nappi(LYHYT(k),"valinta",()=>{
+      if(valittu){ if(tila.ruudukko.length>1) tila.ruudukko = tila.ruudukko.filter(x=>x!==k); }
+      else if(tila.ruudukko.length<4) tila.ruudukko = tila.ruudukko.concat(k);
+      tila.ruudukko = AIHEET.filter(x=>tila.ruudukko.includes(x));
+      store.set("ruudukko-aiheet",tila.ruudukko);
+      teeRuudukkoAsetukset(); teeRuudukko();
+    });
+    b.setAttribute("aria-pressed",String(valittu));
+    if(!valittu && tila.ruudukko.length>=4) b.disabled = true;
+    r.append(b);
+  }
+  r.append(el("span",tila.ruudukko.length+" / 4","ohje"));
+}
+function teeRuudukko(){
+  const g = $("ruudukko"), n = tila.ruudukko.length;
+  g.className = "ruudukko n"+n; g.replaceChildren();
+  for(const k of tila.ruudukko){
+    const tile = el("section",null,"tile"), top = el("div",null,"ptop"), h = el("h2",NIMI(k)), out = el("div",null,"out");
+    const toiminnot = el("div",null,"actions");
+    const uusi = nappi("↻","btn",async()=>{
+      uusi.disabled = true; naytaLataus(out);
+      const kieli = KIELI;
+      try{ const item = await HAKU[k](); if(kieli!==KIELI) return; paiva.set(k,item); paivitaKortit(); piirraSisalto(out,item,n>1); }
+      catch(e){ naytaVirhe(out,()=>uusi.click()); }
+      finally{ uusi.disabled = false; }
+    },T("nayta_toinen"));
+    const avaa = nappi(T("avaa"),"btn",()=>valitseAihe(k));
+    toiminnot.append(uusi,avaa); top.append(h,toiminnot); tile.append(top,out); g.append(tile);
+    const valmis = paiva.get(k);
+    if(valmis) piirraSisalto(out,valmis,n>1);
+    else{
+      naytaLataus(out);
+      const kieli = KIELI;
+      paivanValinta(k).then(item=>{ if(kieli===KIELI && out.isConnected) piirraSisalto(out,item,n>1); })
+        .catch(()=>{ if(out.isConnected) naytaVirhe(out,teeRuudukko); });
+    }
+  }
+}
+function naytaRuudukko(){
+  tila.nakyma = "ruudukko"; tila.item = null; store.set("nakyma","ruudukko");
+  paivitaToiminnot(); teeRuudukkoAsetukset(); teeRuudukko();
+}
+
+/* ---------- Suosikit ---------- */
+function naytaSuosikit(){
+  tila.nakyma = "suosikit"; tila.item = null;
+  paivitaToiminnot(); paivitaKortit(); otsikko(T("suosikit"));
+  const out = $("tulos"); out.className="out"; out.replaceChildren();
+  const l = suosikit.lista();
+  if(!l.length){ out.append(el("p",T("ei_suosikkeja"),"hint")); return; }
+  const ul = el("ul",null,"favs");
+  for(const {item} of l){
+    const li = el("li");
+    const open = nappi(null,"open",()=>{ tila.aihe=item.tyyppi; tila.nakyma="aihe"; paivitaKortit(); naytaItem(item,T("suosikki")); });
+    const tyyppi = item.tyyppi==="paakaupunki" && item.tila ? item.tila : item.tyyppi;
+    open.append(el("span",LYHYET_K[KIELI][tyyppi]||tyyppi,"chip"), el("span",korttiTeksti(item.tyyppi,item),"t"));
+    const del = nappi("✕","del",()=>{ suosikit.poista(suosikit.id(item)); naytaSuosikit(); },T("poista_suosikeista")+": "+item.otsikko);
+    li.append(open,del); ul.append(li);
+  }
+  out.append(ul);
+}
+
+/* ---------- Jakaminen ---------- */
+function jakoteksti(item){
+  const nimi = NIMI(item.tyyppi,item);
+  if(item.tyyppi==="sana") return nimi+": "+item.otsikko+" – "+item.ryhmat[0].maar[0];
+  if(item.tyyppi==="mietelause") return "”"+item.otsikko+"”"+(item.tekija?" – "+item.tekija:"");
+  if(item.tyyppi==="vitsi") return nimi+":\n"+item.teksti;
+  return nimi+": "+korttiTeksti(item.tyyppi,item)+" – "+lyhenna(item.teksti,220);
+}
+async function jaa(){
+  const item = tila.item; if(!item) return;
+  const teksti = jakoteksti(item), url = item.lahde.url;
+  if(navigator.share && matchMedia("(pointer:coarse)").matches){
+    try{ await navigator.share({title:NIMI(item.tyyppi,item), text:teksti, url}); return; }catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  const kaikki = teksti+"\n"+url;
+  try{ await navigator.clipboard.writeText(kaikki); ilmoita(T("kopioitu")); return; }catch(e){}
+  try{
+    const ta = el("textarea"); ta.value = kaikki; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.append(ta); ta.select(); const ok = document.execCommand("copy"); ta.remove();
+    ilmoita(ok ? T("kopioitu") : T("kopiointi_ei"));
+  }catch(e){ ilmoita(T("kopiointi_ei")); }
+}
+let toastAjastin;
+function ilmoita(t){
+  const n = $("toast"); n.textContent = t; n.classList.add("show");
+  clearTimeout(toastAjastin); toastAjastin = setTimeout(()=>n.classList.remove("show"),2200);
+}
+
+/* ---------- Sanavisa ---------- */
+const pisteet = { get(){ return store.get("visa-pisteet",{oikein:0,yhteensa:0}); }, lisaa(ok){ const p=this.get(); p.yhteensa++; if(ok) p.oikein++; store.set("visa-pisteet",p); return p; } };
+function ensimmainenMaar(s){
+  const m = s.ryhmat[0].maar[0].replace(/^\([^)]*\)\s*/,"");
+  // sanaa itseään ei näytetä vaihtoehdossa
+  return m.replace(new RegExp(s.sana.replace(/[^\wåäö]/gi,"\\$&"),"gi"),"___");
+}
+async function uusiVisa(){
+  tila.nakyma = "visa"; tila.item = null; paivitaToiminnot();
+  otsikko(T("sanavisa")); naytaLataus(null,T("arvotaan"));
+  const btn = $("uusiBtn"); btn.disabled = true;
+  try{
+    const sanat = [];
+    for(let y=0;y<3 && sanat.length<3;y++){
+      const ehdokkaat = await satunnaisetSanat(3);
+      const tiedot = (await sanatTietoineen(ehdokkaat.slice(0,10))).filter(s=>{ const m=ensimmainenMaar(s); return m.length>=8 && m.length<=180 && !/^ks\.|^katso|^see\b/i.test(m); });
+      for(const t of tiedot) if(sanat.length<3 && !sanat.some(x=>x.sana===t.sana || ensimmainenMaar(x)===ensimmainenMaar(t))) sanat.push(t);
+    }
+    if(sanat.length<3) throw new Error("visa");
+    if(tila.nakyma!=="visa") return;
+    const oikea = sanat[0];
+    const out = $("tulos"); out.className="out"; out.replaceChildren();
+    const q = el("p",null,"q"); q.append(T("visa1"), el("strong",oikea.sana), T("visa2"));
+    const opts = el("div",null,"opts");
+    const tulosRivi = el("p",null,"score");
+    const p0 = pisteet.get();
+    tulosRivi.textContent = T("pisteet")+p0.oikein+" / "+p0.yhteensa;
+    for(const s of shuffle(sanat)){
+      const b = nappi(ensimmainenMaar(s),"opt",()=>{
+        const ok = s===oikea, p = pisteet.lisaa(ok);
+        opts.querySelectorAll("button").forEach(x=>{ x.disabled=true; });
+        b.classList.add(ok?"right":"wrong");
+        if(!ok){ const o = opts.querySelector('[data-oikea="1"]'); if(o) o.classList.add("right"); }
+        tulosRivi.textContent = (ok ? T("oikein") : T("vaarin")) + T("pisteet")+p.oikein+" / "+p.yhteensa;
+        const lisa = el("p",null,"src");
+        lisa.append(T("lue_lisaa"), link("https://"+KIELI+".wiktionary.org/wiki/"+urlOsa(oikea.sana),oikea.sana));
+        out.append(lisa);
+      });
+      if(s===oikea) b.dataset.oikea="1";
+      opts.append(b);
+    }
+    out.append(q,opts,tulosRivi);
+  }catch(e){
+    if(tila.nakyma==="visa") naytaVirhe(null,uusiVisa);
+  }finally{ btn.disabled=false; paivitaToiminnot(); }
+}
+
+/* ---------- Teema ---------- */
+function onTumma(){
+  const t = document.documentElement.dataset.theme;
+  return t ? t==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+}
+function paivitaTeemaNappi(){
+  const tumma = onTumma(), b = $("teemaBtn");
+  b.replaceChildren(tumma ? "☀" : "☾", el("span", " "+(tumma ? T("vaalea") : T("tumma")), "lab"));
+  b.setAttribute("aria-label", tumma ? T("vaaleaan") : T("tummaan"));
+  tahtitaivas.varit();
+}
+
+/* ---------- Kieli ---------- */
+function paivitaTekstit(){
+  document.documentElement.lang = KIELI;
+  document.title = T("otsikko");
+  $("paaotsikko").textContent = T("otsikko");
+  $("pvm").textContent = new Date().toLocaleDateString(lokaali(),{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  $("kieliFi").setAttribute("aria-pressed",String(KIELI==="fi"));
+  $("kieliEn").setAttribute("aria-pressed",String(KIELI==="en"));
+  $("footTeksti").textContent = T("footer");
+  $("nollaaBtn").textContent = T("nollaa"); $("nollaaBtn").title = T("nollaa_ohje");
+  $("jaaBtn").textContent = T("jaa");
+  kissa.tekstit();
+  paivitaTeemaNappi();
+}
+function vaihdaKieli(k){
+  if(k===KIELI) return;
+  KIELI = k; store.set("kieli",k);
+  paivitaTekstit(); teeKortit();
+  naytaNykyinen();
+  esihae();
+}
+function naytaNykyinen(){
+  if(tila.nakyma==="ruudukko") naytaRuudukko();
+  else if(tila.nakyma==="suosikit") naytaSuosikit();
+  else valitseAihe(tila.aihe);
+}
+// Haetaan päivän valinnat taustalla, jotta kortit täyttyvät
+function esihae(){
+  const kieli = KIELI;
+  AIHEET.forEach((k,i)=>setTimeout(()=>{ if(kieli===KIELI) paivanValinta(k).catch(()=>{}); }, 350*(i+1)));
+}
+
+/* =========================================================
+   Tähtitausta: tähdet liikkuvat hitaasti ja yhdistyvät viivoilla kursoriin
+   ========================================================= */
+const tahtitaivas = (()=>{
+  const c = $("tahdet"), x = c.getContext("2d");
+  const liike = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W=0, H=0, tahdet=[], mx=-9999, my=-9999, vari="#fff", viiva="#6cc0dc", ajastus=null;
+  const SADE = 170, VALI = 95;
+  function uusi(){ return {x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, r:Math.random()*1.3+.45, p:Math.random()*6.28}; }
+  function koko(){
+    const dpr = Math.min(2, window.devicePixelRatio||1);
+    W = innerWidth; H = innerHeight;
+    c.width = Math.round(W*dpr); c.height = Math.round(H*dpr);
+    c.style.width = W+"px"; c.style.height = H+"px";
+    x.setTransform(dpr,0,0,dpr,0,0);
+    const n = Math.max(40, Math.min(170, Math.round(W*H/8500)));
+    while(tahdet.length<n) tahdet.push(uusi());
+    tahdet.length = n;
+    if(!liike) piirra(0);
+  }
+  function varit(){
+    const s = getComputedStyle(document.documentElement);
+    vari = s.getPropertyValue("--tahti").trim() || vari;
+    viiva = s.getPropertyValue("--viiva").trim() || viiva;
+    if(!liike) piirra(0);
+  }
+  function piirra(t){
+    x.clearRect(0,0,W,H);
+    const lahella = [];
+    x.fillStyle = vari;
+    for(const s of tahdet){
+      if(liike){
+        s.x += s.vx; s.y += s.vy;
+        if(s.x<-5) s.x=W+5; else if(s.x>W+5) s.x=-5;
+        if(s.y<-5) s.y=H+5; else if(s.y>H+5) s.y=-5;
+      }
+      x.globalAlpha = liike ? .55+.45*Math.sin(t*.0015+s.p) : .8;
+      x.beginPath(); x.arc(s.x,s.y,s.r,0,6.283); x.fill();
+      const dx = s.x-mx, dy = s.y-my, d = Math.sqrt(dx*dx+dy*dy);
+      if(d<SADE) lahella.push([s,d]);
+    }
+    x.strokeStyle = viiva; x.lineWidth = .8;
+    for(const [s,d] of lahella){
+      x.globalAlpha = (1-d/SADE)*.75;
+      x.beginPath(); x.moveTo(s.x,s.y); x.lineTo(mx,my); x.stroke();
+    }
+    // lähellä kursoria olevat tähdet yhdistyvät myös toisiinsa
+    for(let i=0;i<lahella.length;i++) for(let j=i+1;j<lahella.length;j++){
+      const a = lahella[i][0], b = lahella[j][0], dx = a.x-b.x, dy = a.y-b.y, d = Math.sqrt(dx*dx+dy*dy);
+      if(d<VALI){ x.globalAlpha = (1-d/VALI)*.35; x.beginPath(); x.moveTo(a.x,a.y); x.lineTo(b.x,b.y); x.stroke(); }
+    }
+    x.globalAlpha = 1;
+  }
+  function silmukka(t){ if(!document.hidden) piirra(t); ajastus = requestAnimationFrame(silmukka); }
+  function siirto(px,py){ mx = px; my = py; if(!liike) piirra(0); }
+  window.addEventListener("pointermove",e=>siirto(e.clientX,e.clientY),{passive:true});
+  window.addEventListener("pointerdown",e=>siirto(e.clientX,e.clientY),{passive:true});
+  document.addEventListener("pointerleave",()=>siirto(-9999,-9999));
+  window.addEventListener("blur",()=>siirto(-9999,-9999));
+  window.addEventListener("resize",koko);
+  koko(); varit();
+  if(liike) ajastus = requestAnimationFrame(silmukka);
+  return {varit};
+})();
+
+/* =========================================================
+   Kissagif: Giphy (oma ilmainen avain) tai cataas.com
+   ========================================================= */
+const kissa = (()=>{
+  const img = $("kissaImg"), txt = $("kissaTxt");
+  let ajastin = null, lahde = null;
+  const box = $("kissaBox");
+  // Koko tallennetaan selaimeen. Rajat: 80 px – 420 px (tai näytön leveys).
+  const MIN = 100;
+  // toive = käyttäjän valitsema koko, koko = näytetty koko (rajattu näytön mukaan)
+  let toive = store.get("kissa-koko", (innerWidth && innerWidth<=760) ? 110 : 150), koko = toive;
+  function asetaKoko(w, tallenna){
+    if(!innerWidth || !innerHeight) return;   // piilossa oleva välilehti: ei muuteta kokoa
+    const max = Math.max(MIN, Math.min(420, innerWidth-48, (innerHeight-130)/0.76));
+    koko = Math.round(Math.max(MIN, Math.min(max, w)));
+    box.style.setProperty("--kw", koko+"px");
+    $("kissaPienempi").disabled = koko<=MIN; $("kissaIsompi").disabled = koko>=max;
+    if(tallenna){ toive = koko; store.set("kissa-koko",koko); }
+  }
+  $("kissaIsompi").addEventListener("click",()=>{ const ennen=koko; asetaKoko(koko*1.25,true); if(ennen<=260 && koko>260 && lahde && lahde.giphy) seuraava(); });
+  $("kissaPienempi").addEventListener("click",()=>asetaKoko(koko/1.25,true));
+  // Vetokahva: vasemmalle/ylös vetäminen suurentaa, oikealle/alas pienentää
+  const kahva = $("kissaKahva");
+  let veto = null;
+  kahva.addEventListener("pointerdown",e=>{ e.preventDefault(); kahva.setPointerCapture(e.pointerId); veto = {x:e.clientX, y:e.clientY, w:koko}; });
+  kahva.addEventListener("pointermove",e=>{
+    if(!veto) return;
+    const dx = veto.x-e.clientX, dy = (veto.y-e.clientY)/0.76;
+    asetaKoko(veto.w + (Math.abs(dx)>Math.abs(dy) ? dx : dy), false);
+  });
+  const lopeta = ()=>{ if(veto){ veto = null; toive = koko; store.set("kissa-koko",koko); } };
+  kahva.addEventListener("pointerup",lopeta); kahva.addEventListener("pointercancel",lopeta);
+  // nuolinäppäimillä myös kahvasta
+  kahva.addEventListener("keydown",e=>{
+    if(e.key==="ArrowUp"||e.key==="ArrowLeft"){ asetaKoko(koko+12,true); e.preventDefault(); }
+    if(e.key==="ArrowDown"||e.key==="ArrowRight"){ asetaKoko(koko-12,true); e.preventDefault(); }
+  });
+  window.addEventListener("resize",()=>asetaKoko(toive,false));
+  // Giphy-avain. Huom: avain näkyy sivun lähdekoodissa kaikille, jotka avaavat sivun.
+  const GIPHY_OLETUS = "G9Z3esLRm3nJ586Ro5CZLXU7oFqA8SV7";
+  const avain = () => { const v = store.get("giphy-avain",null); return (v===null ? GIPHY_OLETUS : v).trim(); };
+  async function seuraava(){
+    let src = null, sivu = null;
+    const k = avain();
+    if(k){
+      try{
+        const j = await getJSON("https://api.giphy.com/v1/gifs/random?api_key="+encodeURIComponent(k)+"&tag=cat&rating=g",10000);
+        const im = j && j.data && j.data.images;
+        if(im){ const v = (koko>260 ? (im.downsized_medium||im.downsized||im.original) : im.fixed_height) || im.fixed_height || im.downsized; src = v.url; sivu = j.data.url; }
+      }catch(e){}
+    }
+    if(!src){ src = "https://cataas.com/cat/gif?_="+Date.now(); sivu = "https://cataas.com"; }
+    // ladataan ensin taustalla, jotta kuva ei välähdä tyhjänä
+    const esi = new Image();
+    esi.onload = ()=>{ img.src = src; img.alt = T("kissa"); lahde = {sivu, giphy: sivu && /giphy/.test(sivu)}; tekstit(); };
+    esi.onerror = ()=>{};
+    esi.src = src;
+  }
+  function tekstit(){
+    txt.replaceChildren();
+    if(lahde && lahde.giphy) txt.append(link(lahde.sivu,"Powered by GIPHY"));
+    else txt.append("🐱 "+T("kissa_lyhyt"));
+    for(const [id,a] of [["kissaIsompi","kissa_isompi"],["kissaPienempi","kissa_pienempi"],["kissaKahva","kissa_kahva"]]){ $(id).title = T(a); $(id).setAttribute("aria-label",T(a)); }
+    $("kissaSeur").title = T("seuraava_kissa"); $("kissaSeur").setAttribute("aria-label",T("seuraava_kissa"));
+    $("kissaAsetus").title = T("kissa_asetus"); $("kissaAsetus").setAttribute("aria-label",T("kissa_asetus"));
+    $("kissaPiilo").title = T("piilota_kissa"); $("kissaPiilo").setAttribute("aria-label",T("piilota_kissa"));
+    $("kissaNayta").title = T("nayta_kissa"); $("kissaNayta").setAttribute("aria-label",T("nayta_kissa"));
+  }
+  function nakyy(v){
+    $("kissaBox").hidden = !v; $("kissaNayta").hidden = v; store.set("kissa-piilossa",!v);
+    clearInterval(ajastin);
+    if(v){ seuraava(); ajastin = setInterval(()=>{ if(!document.hidden) seuraava(); }, 60000); }
+  }
+  $("kissaSeur").addEventListener("click",seuraava);
+  $("kissaPiilo").addEventListener("click",()=>nakyy(false));
+  $("kissaNayta").addEventListener("click",()=>nakyy(true));
+  $("kissaAsetus").addEventListener("click",()=>{
+    const v = prompt(T("giphy_kysy"), avain());
+    if(v===null) return;
+    if(/^(oletus|default)$/i.test(v.trim())) store.del("giphy-avain");
+    else store.set("giphy-avain", v.trim());
+    ilmoita(v.trim() ? T("giphy_ok") : T("giphy_pois"));
+    seuraava();
+  });
+  asetaKoko(toive,false);
+  return {tekstit, kaynnista(){ nakyy(!store.get("kissa-piilossa",false)); }};
+})();
+
+/* =========================================================
+   Käynnistys
+   ========================================================= */
+$("uusiBtn").addEventListener("click",naytaToinen);
+$("favBtn").addEventListener("click",()=>{ if(!tila.item) return; const on = suosikit.toggle(tila.item); ilmoita(on?T("lisatty"):T("poistettu")); paivitaToiminnot(); });
+$("jaaBtn").addEventListener("click",jaa);
+$("visaBtn").addEventListener("click",()=>{ if(tila.nakyma==="visa") valitseAihe("sana"); else uusiVisa(); });
+$("pkBtn").addEventListener("click",()=>{
+  PK_TILA = PK_TILA==="paakaupunki" ? "kaupunki" : "paakaupunki";
+  store.set("pk-tila",PK_TILA);
+  teeKortit(); valitseAihe("paakaupunki");
+});
+$("suosikitBtn").addEventListener("click",()=>{ if(tila.nakyma==="suosikit") valitseAihe(tila.aihe); else naytaSuosikit(); });
+$("nakymaBtn").addEventListener("click",()=>{ if(tila.nakyma==="ruudukko") valitseAihe(tila.aihe); else naytaRuudukko(); });
+$("kieliFi").addEventListener("click",()=>vaihdaKieli("fi"));
+$("kieliEn").addEventListener("click",()=>vaihdaKieli("en"));
+$("teemaBtn").addEventListener("click",()=>{
+  const uusi = onTumma() ? "light" : "dark";
+  document.documentElement.dataset.theme = uusi; store.set("teema",uusi); paivitaTeemaNappi();
+});
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",paivitaTeemaNappi);
+$("nollaaBtn").addEventListener("click",()=>{ nahty.nollaa(); ilmoita(T("nollattu")); });
+
+paivitaTekstit();
+teeKortit();
+naytaNykyinen();
+esihae();
+kissa.kaynnista();
+</script>
+</body>
+</html>
