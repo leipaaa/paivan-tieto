@@ -18,18 +18,23 @@ noin minuutissa. Älä lisää repoon mitään salaista.
 
 ## Ulkoasuversiot
 
-`uusi-ulkoasu.html` on kopio `index.html`:stä, jossa on eri `<style>` ja fontit ("Editorial Grid / Magazine":
-Libre Bodoni + Public Sans, sanomalehtimäinen). HTML ja JavaScript ovat samat, joten **JS- ja HTML-muutokset
+- `index.html` – **pääversio** (julkinen pääosoite). "Editorial Grid / Magazine" -ulkoasu: Libre Bodoni + Public Sans,
+  sanomalehtimäinen, viivat erottavat osiot. Väreinä viileä paperi, yönsininen muste (`--ink:#102a43`) ja
+  petroolinvihreä korostus (`--accent:#00676b`, tummassa `#5cc8c2`).
+- `uusi-ulkoasu.html` – alkuperäinen ulkoasu (Bricolage Grotesque + Source Serif 4, pyöristetyt kortit).
+  Nimi on historiallinen: tiedostot vaihdettiin päittäin, jotta lehtiulkoasu on pääosoitteessa.
+
+HTML ja JavaScript ovat samat, ja ne eroavat vain `<style>`-lohkon ja fonttien osalta, joten **JS- ja HTML-muutokset
 tehdään molempiin tiedostoihin**. Luokkanimet ja CSS-muuttujat (`--tahti`, `--viiva` luetaan JS:stä) pidetään samoina.
 Molemmat versiot jakavat localStorage-asetukset.
 
-## Animaatiot (vain index.html)
+## Animaatiot (molemmissa versioissa)
 
 GSAP 3.13 (+ ScrollTrigger, SplitText) ja Lenis 1.3 ladataan jsDelivr-CDN:stä `defer`-attribuutilla, ja tiedoston
 lopussa on oma `<script>`: otsikon kirjainanimaatio, sisällön esiinliukuminen `piirraSisalto`-kääreellä, ruudukon
 ruudut vierittäessä ja pehmeä vieritys. React Bitsin tehosteet on toteutettu tavallisella GSAP:lla, koska sivu ei
 käytä Reactia. Animaatiot ohitetaan, jos `prefers-reduced-motion` on päällä tai CDN ei lataudu.
-`uusi-ulkoasu.html`:ssä ei ole animaatioita, joten tätä osaa ei kopioida sinne.
+Animaatioskripti on molemmissa tiedostoissa sama.
 
 ## Aiheet ja lähteet
 

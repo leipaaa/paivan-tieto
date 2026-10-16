@@ -4,9 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Päivän tieto</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,700;1,500&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <script>
   // Teema ja kieli asetetaan ennen piirtoa, ettei sivu välähdä
   try{
@@ -15,238 +20,227 @@
   }catch(e){}
 </script>
 <style>
-/* Ulkoasu: "Editorial Grid / Magazine" – sanomalehden etusivu.
-   Kirjasimet Libre Bodoni (otsikot) + Public Sans (teksti). Ei varjoja eikä pyöristyksiä, viivat erottavat osiot. */
 :root{
-  --bg:#f3efe6; --paper:#fbf8f2; --ink:#141414; --muted:#57534b; --accent:#b3261e; --accent-ink:#fbf8f2;
-  --line:#d4cdbf; --soft:#e9e3d6; --rule:#141414;
-  --ok:#2e6b3f; --err:#b3261e;
-  --tahti:rgba(20,20,20,.28); --viiva:rgba(179,38,30,.35);
-  --serif:"Libre Bodoni",Didot,"Bodoni 72",Georgia,serif;
-  --sans:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --bg:#e9eff3; --paper:#fbfcfd; --ink:#14283a; --muted:#546676; --accent:#1f6f8b;
+  --birch:#e8b931; --birch-hover:#f2c94c; --line:#c5d2db; --soft:#dfe7ec; --bar:#14283a; --bar-ink:#e9eff3;
+  --ok:#2f7d4f; --err:#a23a2e; --shadow:0 1px 2px rgba(20,40,58,.08),0 4px 14px rgba(20,40,58,.06);
+  --tahti:rgba(20,40,58,.55); --viiva:rgba(31,111,139,.55);
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#121211; --paper:#1a1a18; --ink:#ece7dc; --muted:#a9a395; --accent:#ff7a6b; --accent-ink:#121211;
-    --line:#34322d; --soft:#242320; --rule:#ece7dc;
-    --ok:#7fd49a; --err:#ff8a7a;
-    --tahti:rgba(236,231,220,.5); --viiva:rgba(255,122,107,.4);
+    --bg:#0f1a24; --paper:#172633; --ink:#e3ebf1; --muted:#9db0bf; --accent:#6cc0dc;
+    --birch:#e8b931; --birch-hover:#f2c94c; --line:#2c4153; --soft:#21364a; --bar:#0a131b; --bar-ink:#e3ebf1;
+    --ok:#6fcf97; --err:#ff8a7a; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+    --tahti:rgba(225,238,255,.85); --viiva:rgba(108,192,220,.6);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#121211; --paper:#1a1a18; --ink:#ece7dc; --muted:#a9a395; --accent:#ff7a6b; --accent-ink:#121211;
-  --line:#34322d; --soft:#242320; --rule:#ece7dc;
-  --ok:#7fd49a; --err:#ff8a7a;
-  --tahti:rgba(236,231,220,.5); --viiva:rgba(255,122,107,.4);
+  --bg:#0f1a24; --paper:#172633; --ink:#e3ebf1; --muted:#9db0bf; --accent:#6cc0dc;
+  --birch:#e8b931; --birch-hover:#f2c94c; --line:#2c4153; --soft:#21364a; --bar:#0a131b; --bar-ink:#e3ebf1;
+  --ok:#6fcf97; --err:#ff8a7a; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  --tahti:rgba(225,238,255,.85); --viiva:rgba(108,192,220,.6);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--sans);transition:background .2s,color .2s}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 "Source Serif 4",Georgia,serif;transition:background .2s,color .2s}
 #tahdet{position:fixed;inset:0;z-index:0;pointer-events:none}
-.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:22px 24px 32px}
-h1,h2,.big{font-family:var(--serif)}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:18px 20px 28px}
+h1,h2,.big{font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
 h1,h2{margin:0}
-a{color:var(--accent);text-underline-offset:2px}
+a{color:var(--accent)}
 [hidden]{display:none!important}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-button{cursor:pointer}
-.ui{font-family:var(--sans)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ui{font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
 
-/* Mastheadi: iso nimi keskellä, päiväys ja säätimet viivojen välissä */
-.head{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:8px;border-bottom:4px double var(--rule)}
-h1{flex:1 1 100%;text-align:center;font-size:clamp(2.4rem,5vw,3.6rem);font-weight:700;line-height:1;letter-spacing:-.01em;padding:0 0 8px;margin-bottom:6px;border-bottom:1px solid var(--rule)}
-.date{flex:1 1 auto;margin:0;color:var(--ink);font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.12em}
-.iconbtn{font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.08em;background:transparent;color:var(--ink);border:1px solid var(--rule);border-radius:0;padding:8px 12px;min-height:40px;transition:background .15s,color .15s}
-.iconbtn:hover{background:var(--ink);color:var(--paper)}
-.iconbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-.kielet{display:inline-flex;border:1px solid var(--rule)}
-.kielet button{font:700 .78rem var(--sans);letter-spacing:.08em;border:0;background:transparent;color:var(--muted);padding:8px 12px;min-height:40px}
-.kielet button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+/* Yläpalkki */
+.head{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.05;letter-spacing:-.02em}
+.date{color:var(--muted);margin:0;font-size:.95rem;flex:1 1 auto}
+.iconbtn{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:40px;cursor:pointer}
+.iconbtn:hover{border-color:var(--accent)}
+.iconbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.kielet{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--paper)}
+.kielet button{font:700 .85rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:8px 12px;min-height:40px;cursor:pointer}
+.kielet button[aria-pressed="true"]{background:var(--accent);color:var(--paper)}
 
-/* Aiheet: sisällysluettelo pystyviivoin */
-.cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));margin-bottom:16px;border-bottom:1px solid var(--rule)}
+/* Aihekortit */
+.cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-bottom:14px}
 @media (max-width:1179px){
-  .cards{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -24px 18px;padding:0 24px;scrollbar-width:none}
+  .cards{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;margin:0 -20px 12px;padding:2px 20px 6px;scrollbar-width:none}
   .cards::-webkit-scrollbar{display:none}
-  .card{flex:0 0 160px;scroll-snap-align:start}
+  .card{flex:0 0 150px;scroll-snap-align:start}
 }
-.card{display:flex;gap:10px;align-items:flex-start;text-align:left;background:transparent;color:var(--ink);border:0;border-top:3px solid transparent;border-right:1px solid var(--line);border-radius:0;padding:8px 12px 10px;min-height:66px;font:inherit;transition:background .15s,border-color .15s}
-.card:last-child{border-right:0}
-.card:hover{background:var(--soft)}
-.card[aria-selected="true"]{border-top-color:var(--accent);background:var(--paper)}
+.card{display:flex;gap:8px;align-items:center;text-align:left;background:var(--paper);color:var(--ink);border:2px solid transparent;border-radius:12px;padding:8px 10px;min-height:70px;cursor:pointer;box-shadow:var(--shadow);font:inherit;transition:border-color .15s}
+.card:hover{border-color:var(--line)}
+.card[aria-selected="true"]{border-color:var(--accent)}
 .card .txt{min-width:0;flex:1}
-.card .lbl{display:block;font:700 .66rem var(--sans);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .prev{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font:600 .98rem/1.25 var(--serif);margin-top:4px;overflow-wrap:anywhere}
-.card img{width:42px;height:42px;object-fit:cover;flex:0 0 auto;background:var(--soft);filter:grayscale(.15)}
-.card .prev.wait{color:var(--muted);font-style:italic;font-weight:400}
+.card .lbl{display:block;font:700 .68rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .prev{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.9rem;line-height:1.28;margin-top:2px;overflow-wrap:anywhere}
+.card img{width:40px;height:40px;object-fit:cover;border-radius:7px;flex:0 0 auto;background:var(--soft)}
+.card .prev.wait{color:var(--muted);font-style:italic}
 
-/* Pääjuttu ja ruudukon palstat */
-.panel,.tile{background:var(--paper);border-top:4px solid var(--rule);overflow:hidden}
-.ptop{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:10px 22px;border-bottom:1px solid var(--line);color:var(--ink)}
-.ptop h2{font-size:1.05rem;font-family:var(--sans);font-weight:700;text-transform:uppercase;letter-spacing:.1em;flex:1 1 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{font:700 .66rem var(--sans);text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;color:var(--accent);border:1px solid var(--accent)}
+/* Pääpaneeli ja ruudut */
+.panel,.tile{background:var(--paper);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.ptop{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:12px 16px;background:var(--bar);color:var(--bar-ink)}
+.ptop h2{font-size:1.1rem;flex:1 1 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font:600 .72rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.14)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.07em;border:1px solid var(--rule);border-radius:0;padding:9px 14px;min-height:40px;background:transparent;color:var(--ink);transition:background .15s,color .15s}
-.btn:hover{background:var(--soft)}
-.btn.main{background:var(--ink);color:var(--paper)}
-.btn.main:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn:disabled{opacity:.5;cursor:wait}
-.out{padding:22px 28px 26px;min-height:220px}
+.btn{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:0;border-radius:9px;padding:9px 14px;min-height:40px;cursor:pointer;background:rgba(255,255,255,.12);color:var(--bar-ink)}
+.btn:hover{background:rgba(255,255,255,.22)}
+.btn.main{background:var(--birch);color:#14283a}
+.btn.main:hover{background:var(--birch-hover)}
+.btn:disabled{opacity:.55;cursor:wait}
+.out{padding:22px 26px 24px;min-height:220px}
 .hint{color:var(--muted);font-style:italic;margin:0}
 .err{color:var(--err);margin:0 0 12px}
-.big{font-size:clamp(2.1rem,5.5vw,3.2rem);font-weight:700;line-height:1.05;margin:0 0 14px;letter-spacing:-.01em;overflow-wrap:anywhere}
-.out p{margin:0 0 14px;max-width:68ch}
-/* anfangi eli iso alkukirjain jutun ensimmäiseen kappaleeseen */
-.out > .big + p:not(.tiivis):not(.src):not(.wclass)::first-letter,
-.out > .chips + p:not(.tiivis)::first-letter{float:left;font:700 3.6em/.8 var(--serif);padding:6px 8px 0 0;color:var(--accent)}
-.src{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
-.chip{display:inline-flex;align-items:center;gap:6px;font:700 .7rem var(--sans);text-transform:uppercase;letter-spacing:.1em;background:transparent;color:var(--ink);border:1px solid var(--rule);padding:3px 9px}
-.chip img{height:.95em;width:auto;box-shadow:0 0 0 1px var(--line)}
+.big{font-size:clamp(1.8rem,5.5vw,2.6rem);line-height:1.1;margin:0 0 10px;letter-spacing:-.01em;overflow-wrap:anywhere}
+.out p{margin:0 0 12px;max-width:70ch}
+.src{font-size:.88rem;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 .8rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;background:var(--soft);color:var(--ink);border-radius:999px;padding:3px 10px}
+.chip img{height:.95em;width:auto;border-radius:2px;box-shadow:0 0 0 1px var(--line)}
 
-/* Kuvat ja kartta vasemmalla, teksti oikealla, palstaviiva välissä */
-.out.has-img{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0 0;align-items:start}
-.out.has-img>.media{grid-column:1;grid-row:1/span 30;padding-right:28px;margin-right:28px;border-right:1px solid var(--line)}
+/* Kuvat ja kartta vasemmalle, teksti oikealle */
+.out.has-img{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0 32px;align-items:start}
+.out.has-img>.media{grid-column:1;grid-row:1/span 30}
 .out.has-img>:not(.media){grid-column:2}
-.media{display:grid;gap:16px;margin-bottom:14px}
+.media{display:grid;gap:14px;margin-bottom:14px}
 .media figure{margin:0}
-.stage{position:relative;overflow:hidden;background:var(--soft)}
+.stage{position:relative;border-radius:10px;overflow:hidden;background:var(--soft)}
 .stage img{display:block;width:100%;height:min(44vh,380px);object-fit:contain}
-.media:has(.kartta) .stage img{height:min(24vh,250px)}
-.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:0;background:rgba(20,20,20,.7);color:#fff;font:700 1.3rem/1 system-ui,sans-serif;display:grid;place-items:center}
-.nav:hover{background:var(--accent)}
-.nav.prev{left:0}
-.nav.next{right:0}
-.count{position:absolute;right:0;bottom:0;background:rgba(20,20,20,.75);color:#fff;font:600 .72rem var(--sans);letter-spacing:.06em;padding:4px 9px}
-figcaption{font:italic .76rem/1.35 var(--sans);color:var(--muted);margin-top:6px}
+/* kartan kanssa kuva on matalampi, jotta kuva ja kartta mahtuvat näkyviin ilman vieritystä */
+.media:has(.kartta) .stage img{height:min(30vh,260px)}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(10,19,27,.62);color:#fff;font:700 1.3rem/1 system-ui,sans-serif;cursor:pointer;display:grid;place-items:center}
+.nav:hover{background:rgba(10,19,27,.85)}
+.nav.prev{left:8px}
+.nav.next{right:8px}
+.count{position:absolute;right:10px;bottom:10px;background:rgba(10,19,27,.62);color:#fff;font:600 .78rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;padding:3px 9px;border-radius:999px}
+figcaption{font-size:.78rem;line-height:1.35;color:var(--muted);margin-top:5px}
 figcaption a{color:inherit}
-.kartta iframe{display:block;width:100%;height:min(24vh,230px);border:1px solid var(--line);background:var(--soft);filter:grayscale(.35)}
+.kartta iframe{display:block;width:100%;height:min(30vh,240px);border:0;border-radius:10px;background:var(--soft)}
 
 /* Sana */
 .defs{margin:0 0 14px;padding-left:1.4em}
 .defs li{margin-bottom:8px}
-.defs li::marker{font-family:var(--serif);font-weight:700;color:var(--accent)}
-.defs .esim{display:block;color:var(--muted);font-style:italic;font-size:.93rem}
-.wclass{font:700 .72rem var(--sans);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:0 0 6px}
+.defs .esim{display:block;color:var(--muted);font-style:italic;font-size:.95rem}
+.wclass{font:700 .9rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--accent);margin:0 0 6px}
 
 /* Tietotaulukko */
-.facts{display:grid;grid-template-columns:max-content 1fr;gap:0 16px;margin:6px 0 14px;font-size:.9rem;border-top:2px solid var(--rule)}
-.facts dt,.facts dd{padding:5px 0;border-bottom:1px solid var(--line)}
-.facts dt{font:700 .7rem var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-top:8px}
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:4px 0 14px;font-size:.92rem;border-top:1px solid var(--line);padding-top:10px}
+.facts dt{font:600 .85rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted);padding-top:2px}
 .facts dd{margin:0;overflow-wrap:anywhere}
 
-/* Mietelause ja vitsi: nostolainaus */
-.quote{position:relative;margin:0 0 16px;padding:18px 0 14px;border-top:2px solid var(--rule);border-bottom:1px solid var(--rule);font:italic 500 clamp(1.45rem,3.8vw,2.1rem)/1.35 var(--serif);max-width:40ch}
-.who{font:700 .8rem var(--sans);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:0 0 16px}
-.joke{white-space:pre-line;font:400 clamp(1.15rem,3vw,1.4rem)/1.55 var(--serif);max-width:58ch;margin:0 0 16px;padding:4px 0 4px 20px;border-left:3px solid var(--accent)}
+/* Mietelause ja vitsi */
+.quote{margin:0 0 14px;padding:4px 0 4px 20px;border-left:5px solid var(--birch);font:italic 400 clamp(1.3rem,3.6vw,1.75rem)/1.45 "Source Serif 4",Georgia,serif;max-width:46ch}
+.who{font:600 1.05rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;margin:0 0 14px}
+.joke{white-space:pre-line;font-size:clamp(1.15rem,3vw,1.4rem);line-height:1.55;max-width:60ch;margin:0 0 16px;padding:4px 0 4px 20px;border-left:5px solid var(--birch)}
 
 /* Visa */
-.q{font:600 1.3rem var(--serif);margin:0 0 14px}
+.q{font-size:1.15rem;margin:0 0 14px}
 .opts{display:grid;gap:10px;margin:0 0 14px;max-width:760px}
-.opt{text-align:left;font:inherit;font-size:1rem;line-height:1.4;padding:12px 14px;border:1px solid var(--rule);border-radius:0;background:var(--paper);color:var(--ink);transition:background .15s}
-.opt:hover:not(:disabled){background:var(--soft)}
+.opt{text-align:left;font:inherit;font-size:1rem;line-height:1.4;padding:12px 14px;border-radius:10px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
 .opt:disabled{cursor:default}
-.opt.right{border:2px solid var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--paper))}
-.opt.wrong{border:2px solid var(--err);background:color-mix(in srgb,var(--err) 10%,var(--paper))}
-.score{font:700 .78rem var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.inline{font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.07em;border:0;border-radius:0;padding:10px 16px;min-height:40px;background:var(--ink);color:var(--paper)}
-.inline:hover{background:var(--accent);color:var(--accent-ink)}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--paper))}
+.opt.wrong{border-color:var(--err);background:color-mix(in srgb,var(--err) 12%,var(--paper))}
+.score{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted)}
+.inline{font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:0;border-radius:9px;padding:9px 14px;min-height:40px;cursor:pointer;background:var(--birch);color:#14283a}
 
 /* Suosikit */
-.favs{list-style:none;margin:0;padding:0;display:grid;border-top:2px solid var(--rule)}
-.favs li{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:6px 4px}
-.favs .open{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;padding:6px 0;display:flex;gap:12px;align-items:baseline}
+.favs{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.favs li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:6px 6px 6px 12px}
+.favs .open{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:6px 0;display:flex;gap:10px;align-items:baseline}
 .favs .open:hover .t{text-decoration:underline}
-.favs .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--serif);font-weight:600}
-.favs .del{background:none;border:0;color:var(--muted);font-size:1.1rem;padding:6px 10px;min-width:44px;min-height:40px}
+.favs .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.favs .del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:6px 10px;border-radius:8px}
 .favs .del:hover{color:var(--err);background:var(--soft)}
 
 /* Ruudukkonäkymä */
-.rasetukset{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:10px 0;border-bottom:1px solid var(--rule)}
-.rasetukset .ohje{font:700 .72rem var(--sans);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-right:4px}
-.valinta{font:600 .78rem var(--sans);border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:0;padding:6px 12px;min-height:36px;transition:background .15s,border-color .15s}
-.valinta:hover:not(:disabled){border-color:var(--rule)}
-.valinta[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.valinta:disabled{opacity:.4;cursor:not-allowed}
-.paivita-kaikki{margin-left:auto;background:var(--accent);border-color:var(--accent);color:var(--accent-ink);text-transform:uppercase;letter-spacing:.07em}
-.paivita-kaikki:hover:not(:disabled){background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.ruudukko{display:grid;gap:22px}
+.rasetukset{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--paper);border-radius:12px;box-shadow:var(--shadow)}
+.rasetukset .ohje{font:600 .9rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted);margin-right:4px}
+.valinta{font:600 .88rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:36px;cursor:pointer}
+.valinta[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.valinta:disabled{opacity:.45;cursor:not-allowed}
+.paivita-kaikki{margin-left:auto;background:var(--birch);border-color:var(--birch);color:#14283a}
+.paivita-kaikki:hover:not(:disabled){background:var(--birch-hover)}
+.ruudukko{display:grid;gap:12px}
 .ruudukko.n1{grid-template-columns:1fr}
 .ruudukko.n2,.ruudukko.n4{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ruudukko.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .tile{display:flex;flex-direction:column;min-width:0}
-.tile .ptop{padding:8px 14px}
-.tile .ptop h2{font-size:.85rem}
-.tile .btn{padding:6px 10px;min-height:34px;font-size:.72rem}
-.tile .out{padding:16px 16px 18px;min-height:160px;flex:1}
+.tile .ptop{padding:8px 12px}
+.tile .ptop h2{font-size:1rem}
+.tile .btn{padding:6px 10px;min-height:34px;font-size:.85rem}
+.tile .out{padding:14px 16px 16px;min-height:160px;flex:1}
 .ruudukko:not(.n1) .stage img{height:220px}
-.ruudukko:not(.n1) .big{font-size:1.7rem}
-.ruudukko:not(.n1) .quote{font-size:1.3rem}
+.ruudukko:not(.n1) .big{font-size:1.5rem}
+.ruudukko:not(.n1) .quote{font-size:1.2rem}
 .ruudukko:not(.n1) .joke{font-size:1.08rem}
 .tiivis{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
 
-/* Sää: sanomalehden sääruutu */
-.saa{background:var(--paper);border:1px solid var(--rule);box-shadow:inset 0 0 0 3px var(--paper),inset 0 0 0 4px var(--line);padding:12px 16px;margin-bottom:18px;font-family:var(--sans);
+/* Sää: leveällä näytöllä oma palsta vasemmalla tai oikealla, kapealla vaakarivi yläreunassa */
+.saa{background:var(--paper);border-radius:12px;box-shadow:var(--shadow);padding:10px 14px;margin-bottom:14px;font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
   display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px}
 .saa-top{display:flex;align-items:center;gap:2px}
-.saa-paikka{font:700 .78rem var(--sans);text-transform:uppercase;letter-spacing:.12em;margin-right:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.saa-top button{background:none;border:0;color:var(--muted);font-size:.95rem;padding:2px 5px;min-width:32px;min-height:32px}
+.saa-paikka{font-weight:700;font-size:.95rem;margin-right:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.saa-top button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.95rem;padding:2px 5px;border-radius:6px;min-width:28px;min-height:30px}
 .saa-top button:hover{background:var(--soft);color:var(--ink)}
 #saaPuoli{display:none}
 .saa-nyt{display:flex;align-items:center;gap:10px}
+/* emojifontti ja U+FE0F, jotta Firefox näyttää värikuvakkeet eikä pieniä tekstimerkkejä */
 .saa-ikoni,.saa-paivat .ik{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal}
 .saa-ikoni{font-size:2.2rem;line-height:1}
-.saa-temp{font:700 2.2rem/1 var(--serif);letter-spacing:-.02em}
-.saa-kuvaus{font-size:.8rem;color:var(--muted);line-height:1.35}
-.saa-kuvaus b{color:var(--ink);font-weight:700}
-.saa-paivat{display:flex;gap:14px;font-size:.78rem;text-align:center}
+.saa-temp{font-size:1.9rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.saa-kuvaus{font-size:.82rem;color:var(--muted);line-height:1.3}
+.saa-kuvaus b{color:var(--ink);font-weight:600}
+.saa-paivat{display:flex;gap:12px;font-size:.8rem;text-align:center}
 .saa-paivat div{display:grid;gap:1px}
-.saa-paivat .pv{color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:.68rem}
+.saa-paivat .pv{color:var(--muted);text-transform:capitalize}
 .saa-paivat .ik{font-size:1.75rem;line-height:1.25}
-.saa-paivat .mm{white-space:nowrap;font-weight:600}
-.saa-paivat .mm span{color:var(--muted);font-weight:400}
-.saa-lahde{font-size:.68rem;margin-left:auto}
+.saa-paivat .mm{white-space:nowrap}
+.saa-paivat .mm span{color:var(--muted)}
+.saa-lahde{font-size:.7rem;margin-left:auto}
 .saa-lahde a{color:var(--muted)}
 @media (min-width:1280px){
-  .wrap{max-width:1420px}
-  .wrap.saa-vasen{padding-left:268px}
-  .wrap.saa-oikea{padding-right:268px}
-  .saa{position:absolute;top:22px;width:224px;display:block;padding:14px 16px;margin:0}
-  .saa-vasen .saa{left:24px}
-  .saa-oikea .saa{right:24px}
+  .wrap{max-width:1380px}
+  .wrap.saa-vasen{padding-left:256px}
+  .wrap.saa-oikea{padding-right:256px}
+  .saa{position:absolute;top:18px;width:220px;display:block;padding:12px 14px;margin:0}
+  .saa-vasen .saa{left:20px}
+  .saa-oikea .saa{right:20px}
   #saaPuoli{display:inline-block}
-  .saa-top{margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+  .saa-top{margin-bottom:8px}
   .saa-paikka{flex:1}
-  .saa-nyt{margin-bottom:12px}
+  .saa-nyt{margin-bottom:10px}
   .saa-ikoni{font-size:2.6rem}
-  .saa-temp{font-size:2.8rem}
-  .saa-paivat{justify-content:space-between;gap:4px;border-top:1px solid var(--line);padding-top:10px}
-  .saa-lahde{margin-top:10px;text-align:right}
+  .saa-temp{font-size:2.3rem}
+  .saa-paivat{justify-content:space-between;gap:4px;border-top:1px solid var(--line);padding-top:8px}
+  .saa-lahde{margin-top:8px;text-align:right}
 }
 
 /* Kissagif */
 .kissa{position:fixed;right:14px;bottom:14px;z-index:5}
-.kbox{position:relative;background:var(--paper);border:1px solid var(--rule);padding:6px;--kw:144px}
-.kbox img{display:block;width:var(--kw);height:calc(var(--kw)*.76);object-fit:cover;background:var(--soft)}
+.kbox{position:relative;background:var(--paper);border-radius:12px;box-shadow:var(--shadow),0 0 0 1px var(--line);padding:6px;--kw:144px}
+.kbox img{display:block;width:var(--kw);height:calc(var(--kw)*.76);object-fit:cover;border-radius:8px;background:var(--soft)}
 /* vetokahva vasemmassa yläkulmassa: vedä ulos = isompi, sisään = pienempi */
-.kahva{position:absolute;left:-8px;top:-8px;width:24px;height:24px;border:0;padding:0;cursor:nwse-resize;touch-action:none;
-  background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font:700 .8rem/1 system-ui,sans-serif}
+.kahva{position:absolute;left:-7px;top:-7px;width:24px;height:24px;border-radius:50%;border:0;padding:0;cursor:nwse-resize;touch-action:none;
+  background:var(--accent);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--paper);font:700 .8rem/1 system-ui,sans-serif}
 .kahva:hover{filter:brightness(1.1)}
-.kbox{width:calc(var(--kw) + 14px)}
+.kbox{width:calc(var(--kw) + 12px)}
 .kbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0 2px;margin-top:4px}
-.kbar span{flex:1 1 100%;font:700 .66rem var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kbar span{flex:1 1 100%;font:700 .72rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kbar a{color:inherit}
-.kbar button,.knayta{background:none;border:0;color:var(--muted);font-size:.95rem;padding:2px 4px;min-width:26px;min-height:28px}
+.kbar button,.knayta{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.95rem;padding:2px 4px;border-radius:6px;min-width:26px;min-height:28px}
 .kbar button:disabled{opacity:.35;cursor:default}
 .kbar button:hover{background:var(--soft);color:var(--ink)}
-.knayta{background:var(--paper);border:1px solid var(--rule);font-size:1.4rem;width:48px;height:48px}
+.knayta{background:var(--paper);box-shadow:var(--shadow),0 0 0 1px var(--line);font-size:1.4rem;width:48px;height:48px;border-radius:50%}
 
 /* Alatunniste ja ilmoitus */
-.foot{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-top:22px;padding-top:10px;border-top:4px double var(--rule);font-size:.78rem;color:var(--muted)}
-.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;padding:4px 0}
-.toast{position:fixed;left:50%;bottom:22px;z-index:10;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);font:600 .85rem var(--sans);letter-spacing:.04em;padding:10px 18px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
+.foot{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-top:12px;font-size:.82rem;color:var(--muted)}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:4px 0}
+.toast{position:fixed;left:50%;bottom:22px;z-index:10;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);font:600 .95rem "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @media (max-width:900px){
@@ -254,28 +248,28 @@ figcaption a{color:inherit}
   .ruudukko.n3 .tile:first-child{grid-column:1/-1}
 }
 @media (max-width:760px){
-  body{font-size:16px}
-  .wrap{padding:14px 16px 120px}
-  .head{gap:6px 8px;margin-bottom:14px}
-  h1{font-size:2.3rem;padding-bottom:8px;margin-bottom:4px}
-  .date{order:3;flex-basis:100%;text-align:center;font-size:.7rem;padding-top:4px}
-  .iconbtn{padding:6px 10px;min-height:40px;min-width:40px}
+  body{font-size:17px}
+  .wrap{padding:12px 12px 120px}
+  .head{gap:6px 8px;margin-bottom:10px}
+  .head h1{flex:1 1 auto}
+  .date{order:3;flex-basis:100%;font-size:.88rem}
+  .head h1{font-size:1.45rem}
+  .iconbtn{padding:6px 9px;min-height:38px;min-width:38px}
   .iconbtn .lab{display:none}
-  .kielet button{padding:6px 9px;min-height:40px}
+  .kielet button{padding:6px 7px;min-height:38px}
   .kbar span{display:none}
   .kbar{justify-content:space-between}
-  .cards{margin:0 -16px 14px;padding:0 16px}
-  .card{flex-basis:148px;min-height:68px}
-  .out{padding:18px 16px 20px}
-  .ptop{padding:10px 16px}
+  .cards{margin:0 -12px 10px;padding:2px 12px 6px}
+  .card{flex-basis:144px;min-height:64px}
+  .out{padding:16px 16px 18px}
   .out.has-img{display:block}
-  .out.has-img>.media{padding-right:0;margin-right:0;border-right:0}
   .stage img{height:260px}
   .kartta iframe{height:220px}
+  .ptop{padding:10px 12px}
   .btn{padding:8px 11px}
   .ruudukko.n2,.ruudukko.n3,.ruudukko.n4{grid-template-columns:1fr}
   .ruudukko.n3 .tile:first-child{grid-column:auto}
-  .kbox{padding:5px;width:calc(var(--kw) + 12px)}
+  .kbox{padding:5px;width:calc(var(--kw) + 10px)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -1851,6 +1845,53 @@ setInterval(()=>{
   nykyPaiva = tanaan();
   paivitaTekstit(); teeKortit(); if(tila.nakyma!=="visa") naytaNykyinen(); esihae();
 }, 60000);
+</script>
+
+<script>
+/* =========================================================
+   ANIMAATIOT (vain animoitu.html): GSAP + ScrollTrigger + SplitText + Lenis.
+   React Bits -komponentit vaativat Reactin, joten niiden tehosteet on tehty
+   tässä tavallisella GSAP:lla: SplitText (otsikko), AnimatedContent (sisältö), ScrollReveal (ruudut).
+   Kirjastot ladataan CDN:stä defer-attribuutilla → käynnistetään DOMContentLoadedissa.
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  if(!window.gsap) return;   // CDN ei latautunut → sivu toimii ilman animaatioita
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  // Lenis: pehmeä vieritys, tahdistettu ScrollTriggeriin
+  if(window.Lenis){
+    const lenis = new Lenis({autoRaf:false});
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add(t=>lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  // React Bits "SplitText": otsikon kirjaimet nousevat porrastetusti
+  const h1 = document.getElementById("paaotsikko");
+  document.fonts.ready.then(()=>{
+    const s = SplitText.create(h1, {type:"chars"});
+    gsap.from(s.chars, {yPercent:110, opacity:0, duration:.7, ease:"power3.out", stagger:.035,
+      onComplete:()=>s.revert()});   // palautetaan teksti, jotta kielen vaihto toimii
+  });
+  gsap.from(".head > :not(h1), .cards", {opacity:0, y:12, duration:.6, ease:"power2.out", stagger:.06, delay:.2});
+
+  // React Bits "AnimatedContent": jokainen uusi sisältö liukuu esiin
+  const alkuperainen = piirraSisalto;
+  piirraSisalto = function(out, item, tiivis){
+    alkuperainen(out, item, tiivis);
+    gsap.fromTo(out.children, {opacity:0, y:18}, {opacity:1, y:0, duration:.5, ease:"power2.out", stagger:.06, clearProps:"transform,opacity"});
+  };
+
+  // React Bits "ScrollReveal": ruudukon ruudut ilmestyvät vierittäessä
+  const naytaRuudut = ()=>ScrollTrigger.batch("#ruudukko .tile:not([data-nahty])", {
+    start:"top 92%",
+    onEnter:els=>{ els.forEach(e=>e.dataset.nahty=""); gsap.fromTo(els, {opacity:0, y:30, scale:.98}, {opacity:1, y:0, scale:1, duration:.6, ease:"power3.out", stagger:.08, clearProps:"transform,opacity"}); }
+  });
+  new MutationObserver(()=>{ naytaRuudut(); ScrollTrigger.refresh(); })
+    .observe(document.getElementById("ruudukko"), {childList:true});
+  naytaRuudut();
+});
 </script>
 </body>
 </html>
