@@ -53,9 +53,12 @@ Animaatioskripti on molemmissa tiedostoissa sama.
 ## Yksityisyys, suostumus ja analytiikka
 
 Sivu ei aseta evästeitä. Suostumusbanneri (`suostumus`-moduuli) kysyy luvan kävijätilastoille, ja valinta
-tallennetaan avaimeen `suostumus` (`kaikki` | `valttamattomat`). Alatunnisteen Evästeasetukset-linkki avaa
+tallennetaan avaimeen `suostumus` (`kaikki` | `valttamattomat` | `ilmoitus` = pelkkä ilmoitus kuitattu, ei lupaa). Alatunnisteen Evästeasetukset-linkki avaa
 bannerin uudelleen. Analytiikka on GoatCounter (ilman evästeitä), ja se ladataan vain suostumuksella ja vain, jos
 vakio `ANALYTIIKKA` (GoatCounter-tilin koodi) ei ole tyhjä. Tili luodaan osoitteessa goatcounter.com.
+**Nyt analytiikka on pois päältä** (`ANALYTIIKKA = ""`, käyttäjän päätös 16.10.2026). Silloin banneri on pelkkä
+ilmoitus "ei evästeitä, ei kävijätietoja" yhdellä Selvä-painikkeella. Jos analytiikka otetaan käyttöön, aseta koodi
+molempiin tiedostoihin ja palauta tietosuojaselosteen Kävijätilastot-osio kuvaamaan GoatCounteria.
 
 ## Aiheet ja lähteet
 

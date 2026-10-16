@@ -448,7 +448,7 @@ const TEKSTIT = {
     footer:"Tiedot: Wikisanakirja, Wikipedia, Wikidata, Wikisitaatit, Wikikirjasto, OpenStreetMap ja Wikimedia Commons (vapaat lisenssit). Sää: Open-Meteo. Kissat: cataas.com.",
     lahde:"Lähde: ", kuva:"Kuva: ", esim:"Esim. ", tekniset_en:" · Tekniset tiedot englanninkielisestä Wikipediasta", luvut_wd:" · Luvut Wikidatasta",
     visa1:"Mitä sana ", visa2:" tarkoittaa?", pisteet:"Pisteet: ", oikein:"Oikein! ", vaarin:"Väärin. ", lue_lisaa:"Lue lisää sanasta: ", arvotaan:"Arvotaan kysymystä…",
-    tietosuoja:"Tietosuoja", kayttoehdot:"Käyttöehdot", evasteasetukset:"Evästeasetukset", s_otsikko:"Yksityisyys.", s_teksti:"Sivu ei käytä evästeitä, ja asetukset tallentuvat vain selaimeesi. Saako sivu laskea nimetöntä kävijätilastoa (GoatCounter, ilman evästeitä)?", s_linkki:"Tietosuojaseloste", s_kylla:"Salli tilastot", s_ei:"Vain välttämättömät",
+    tietosuoja:"Tietosuoja", kayttoehdot:"Käyttöehdot", evasteasetukset:"Evästeasetukset", s_otsikko:"Yksityisyys.", s_teksti:"Sivu ei käytä evästeitä, ja asetukset tallentuvat vain selaimeesi. Saako sivu laskea nimetöntä kävijätilastoa (GoatCounter, ilman evästeitä)?", s_linkki:"Tietosuojaseloste", s_kylla:"Salli tilastot", s_ei:"Vain välttämättömät", s_ilmoitus:"Sivu ei käytä evästeitä eikä kerää kävijätietoja. Asetuksesi tallentuvat vain tähän selaimeen.", s_selva:"Selvä",
     valitse:"Valitse ruudukkoon 1–4 aihetta:", paivita_kaikki:"Päivitä kaikki", lue_lisaa_nappi:"Lue lisää", nayta_vahemman:"Näytä vähemmän", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
     kaupunkeihin:"Vaihda kaupunkeihin", paakaupunkeihin:"Vaihda pääkaupunkeihin",
     kissa:"Päivän kissa", kissa_lyhyt:"Kissa", kissa_isompi:"Suurenna kissaa", kissa_pienempi:"Pienennä kissaa", kissa_kahva:"Vedä muuttaaksesi kissan kokoa", seuraava_kissa:"Seuraava kissa", piilota_kissa:"Piilota kissa", nayta_kissa:"Näytä kissa", kissa_asetus:"Giphy-asetukset",
@@ -471,7 +471,7 @@ const TEKSTIT = {
     footer:"Sources: Wiktionary, Wikipedia, Wikidata, Wikiquote, icanhazdadjoke, OpenStreetMap and Wikimedia Commons (free licences). Weather: Open-Meteo. Cats: cataas.com.",
     lahde:"Source: ", kuva:"Image: ", esim:"E.g. ", tekniset_en:"", luvut_wd:" · Figures from Wikidata",
     visa1:"What does ", visa2:" mean?", pisteet:"Score: ", oikein:"Correct! ", vaarin:"Wrong. ", lue_lisaa:"Read more: ", arvotaan:"Picking a question…",
-    tietosuoja:"Privacy", kayttoehdot:"Terms", evasteasetukset:"Cookie settings", s_otsikko:"Privacy.", s_teksti:"This site uses no cookies, and your settings stay in your browser. May the site count anonymous visitor statistics (GoatCounter, cookieless)?", s_linkki:"Privacy policy", s_kylla:"Allow statistics", s_ei:"Essential only",
+    tietosuoja:"Privacy", kayttoehdot:"Terms", evasteasetukset:"Cookie settings", s_otsikko:"Privacy.", s_teksti:"This site uses no cookies, and your settings stay in your browser. May the site count anonymous visitor statistics (GoatCounter, cookieless)?", s_linkki:"Privacy policy", s_kylla:"Allow statistics", s_ei:"Essential only", s_ilmoitus:"This site uses no cookies and collects no visitor data. Your settings are stored only in this browser.", s_selva:"Got it",
     valitse:"Choose 1–4 topics for the grid:", paivita_kaikki:"Refresh all", lue_lisaa_nappi:"Read more", nayta_vahemman:"Show less", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
     kaupunkeihin:"Switch to cities", paakaupunkeihin:"Switch to capitals",
     kissa:"Cat of the moment", kissa_lyhyt:"Cat", kissa_isompi:"Make the cat bigger", kissa_pienempi:"Make the cat smaller", kissa_kahva:"Drag to resize the cat", seuraava_kissa:"Next cat", piilota_kissa:"Hide cat", nayta_kissa:"Show cat", kissa_asetus:"Giphy settings",
@@ -1815,17 +1815,22 @@ const suostumus = (()=>{
     store.set("suostumus",v); $("suostumus").hidden = true;
     if(v==="kaikki") lataa(); else { const s = document.getElementById("goatcounter"); if(s) s.remove(); }
   }
+  // Ilman analytiikkaa banneri on pelkkä ilmoitus (yksi OK-painike), koska lupaa ei tarvitse kysyä
   function tekstit(){
-    $("suostumusOtsikko").textContent = T("s_otsikko"); $("suostumusTeksti").textContent = T("s_teksti");
+    $("suostumusOtsikko").textContent = T("s_otsikko");
+    $("suostumusTeksti").textContent = ANALYTIIKKA ? T("s_teksti") : T("s_ilmoitus");
     $("suostumusLinkki").textContent = T("s_linkki");
-    $("suostumusKylla").textContent = T("s_kylla"); $("suostumusEi").textContent = T("s_ei");
+    $("suostumusKylla").textContent = ANALYTIIKKA ? T("s_kylla") : T("s_selva");
+    $("suostumusEi").textContent = T("s_ei"); $("suostumusEi").hidden = !ANALYTIIKKA;
   }
-  $("suostumusKylla").addEventListener("click",()=>valitse("kaikki"));
+  // ilman analytiikkaa "Selvä" ei ole lupa tilastoille: jos ne otetaan käyttöön, lupa kysytään erikseen
+  $("suostumusKylla").addEventListener("click",()=>valitse(ANALYTIIKKA ? "kaikki" : "ilmoitus"));
   $("suostumusEi").addEventListener("click",()=>valitse("valttamattomat"));
-  $("suostumusBtn").addEventListener("click",()=>{ $("suostumus").hidden = false; $("suostumusEi").focus(); });
+  $("suostumusBtn").addEventListener("click",()=>{ $("suostumus").hidden = false; (ANALYTIIKKA ? $("suostumusEi") : $("suostumusKylla")).focus(); });
   return {tekstit, kaynnista(){
     const v = store.get("suostumus",null);
-    if(v==="kaikki") lataa(); else if(v===null) $("suostumus").hidden = false;
+    if(v==="kaikki") lataa();
+    else if(v===null || (ANALYTIIKKA && v==="ilmoitus")) $("suostumus").hidden = false;
   }};
 })();
 
