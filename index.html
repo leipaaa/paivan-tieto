@@ -184,14 +184,16 @@ figcaption a{color:inherit}
 .saa-top button:hover{background:var(--soft);color:var(--ink)}
 #saaPuoli{display:none}
 .saa-nyt{display:flex;align-items:center;gap:10px}
-.saa-ikoni{font-size:2rem;line-height:1}
+/* emojifontti ja U+FE0F, jotta Firefox näyttää värikuvakkeet eikä pieniä tekstimerkkejä */
+.saa-ikoni,.saa-paivat .ik{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal}
+.saa-ikoni{font-size:2.2rem;line-height:1}
 .saa-temp{font-size:1.9rem;font-weight:700;line-height:1;letter-spacing:-.02em}
 .saa-kuvaus{font-size:.82rem;color:var(--muted);line-height:1.3}
 .saa-kuvaus b{color:var(--ink);font-weight:600}
 .saa-paivat{display:flex;gap:12px;font-size:.8rem;text-align:center}
 .saa-paivat div{display:grid;gap:1px}
 .saa-paivat .pv{color:var(--muted);text-transform:capitalize}
-.saa-paivat .ik{font-size:1.15rem;line-height:1.2}
+.saa-paivat .ik{font-size:1.75rem;line-height:1.25}
 .saa-paivat .mm{white-space:nowrap}
 .saa-paivat .mm span{color:var(--muted)}
 .saa-lahde{font-size:.7rem;margin-left:auto}
@@ -207,7 +209,7 @@ figcaption a{color:inherit}
   .saa-top{margin-bottom:8px}
   .saa-paikka{flex:1}
   .saa-nyt{margin-bottom:10px}
-  .saa-ikoni{font-size:2.4rem}
+  .saa-ikoni{font-size:2.6rem}
   .saa-temp{font-size:2.3rem}
   .saa-paivat{justify-content:space-between;gap:4px;border-top:1px solid var(--line);padding-top:8px}
   .saa-lahde{margin-top:8px;text-align:right}
@@ -1723,13 +1725,13 @@ const saa = (()=>{
   // WMO-säätilakoodit → kuvake ja teksti
   const KOODIT = [
     [[0],"☀","Selkeää","Clear"], [[1],"🌤","Enimmäkseen selkeää","Mainly clear"], [[2],"⛅","Puolipilvistä","Partly cloudy"],
-    [[3],"☁","Pilvistä","Overcast"], [[45,48],"🌫","Sumua","Fog"], [[51,53,55],"🌦","Tihkusadetta","Drizzle"],
+    [[3],"☁","Pilvistä","Overcast"], [[45,48],"🌁","Sumua","Fog"], [[51,53,55],"🌦","Tihkusadetta","Drizzle"],
     [[56,57,66,67],"🌧","Jäätävää sadetta","Freezing rain"], [[61,63,65],"🌧","Sadetta","Rain"],
     [[71,73,75,77],"🌨","Lumisadetta","Snow"], [[80,81,82],"🌦","Sadekuuroja","Rain showers"],
     [[85,86],"🌨","Lumikuuroja","Snow showers"], [[95,96,99],"⛈","Ukkosta","Thunderstorm"]
   ];
   const koodi = c => KOODIT.find(r=>r[0].includes(c)) || [[],"·","",""];
-  const ikoni = (c,paiva) => c===0 && !paiva ? "🌙" : koodi(c)[1];
+  const ikoni = (c,paiva) => (c===0 && !paiva ? "🌙" : koodi(c)[1]).replace(/\uFE0F/g,"")+"\uFE0F";
   const aste = v => Math.round(v)+"°";
   let kaupunki = store.get("saa-kaupunki",OLETUS), data = null, virhe = false;
 
