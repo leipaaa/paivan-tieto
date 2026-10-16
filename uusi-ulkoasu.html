@@ -396,7 +396,7 @@ const TEKSTIT = {
     footer:"Tiedot: Wikisanakirja, Wikipedia, Wikidata, Wikisitaatit, Wikikirjasto, OpenStreetMap ja Wikimedia Commons (vapaat lisenssit). Kissat: GIPHY.",
     lahde:"Lähde: ", kuva:"Kuva: ", esim:"Esim. ", tekniset_en:" · Tekniset tiedot englanninkielisestä Wikipediasta", luvut_wd:" · Luvut Wikidatasta",
     visa1:"Mitä sana ", visa2:" tarkoittaa?", pisteet:"Pisteet: ", oikein:"Oikein! ", vaarin:"Väärin. ", lue_lisaa:"Lue lisää sanasta: ", arvotaan:"Arvotaan kysymystä…",
-    valitse:"Valitse ruudukkoon 1–4 aihetta:", paivita_kaikki:"Päivitä kaikki", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
+    valitse:"Valitse ruudukkoon 1–4 aihetta:", paivita_kaikki:"Päivitä kaikki", lue_lisaa_nappi:"Lue lisää", nayta_vahemman:"Näytä vähemmän", avaa:"Avaa", kartta_iso:"Avaa suurempi kartta", kartta:"Kartta",
     kaupunkeihin:"Vaihda kaupunkeihin", paakaupunkeihin:"Vaihda pääkaupunkeihin",
     kissa:"Päivän kissa", kissa_lyhyt:"Kissa", kissa_isompi:"Suurenna kissaa", kissa_pienempi:"Pienennä kissaa", kissa_kahva:"Vedä muuttaaksesi kissan kokoa", seuraava_kissa:"Seuraava kissa", piilota_kissa:"Piilota kissa", nayta_kissa:"Näytä kissa", kissa_asetus:"Giphy-asetukset",
     giphy_kysy:"Giphy API -avain. Jätä tyhjäksi, niin käytetään cataas.com-kissoja. Kirjoita \"oletus\", niin palautetaan sivun oma avain.",
@@ -418,7 +418,7 @@ const TEKSTIT = {
     footer:"Sources: Wiktionary, Wikipedia, Wikidata, Wikiquote, icanhazdadjoke, OpenStreetMap and Wikimedia Commons (free licences). Cats: GIPHY.",
     lahde:"Source: ", kuva:"Image: ", esim:"E.g. ", tekniset_en:"", luvut_wd:" · Figures from Wikidata",
     visa1:"What does ", visa2:" mean?", pisteet:"Score: ", oikein:"Correct! ", vaarin:"Wrong. ", lue_lisaa:"Read more: ", arvotaan:"Picking a question…",
-    valitse:"Choose 1–4 topics for the grid:", paivita_kaikki:"Refresh all", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
+    valitse:"Choose 1–4 topics for the grid:", paivita_kaikki:"Refresh all", lue_lisaa_nappi:"Read more", nayta_vahemman:"Show less", avaa:"Open", kartta_iso:"Open a larger map", kartta:"Map",
     kaupunkeihin:"Switch to cities", paakaupunkeihin:"Switch to capitals",
     kissa:"Cat of the moment", kissa_lyhyt:"Cat", kissa_isompi:"Make the cat bigger", kissa_pienempi:"Make the cat smaller", kissa_kahva:"Drag to resize the cat", seuraava_kissa:"Next cat", piilota_kissa:"Hide cat", nayta_kissa:"Show cat", kissa_asetus:"Giphy settings",
     giphy_kysy:"Giphy API key. Leave empty to use cats from cataas.com. Type \"default\" to restore the page's own key.",
@@ -1213,17 +1213,29 @@ function piirraMietelause(out,item){
 const PIIRRA = {sana:piirraSana, auto:piirraKulkuneuvo, lentokone:piirraKulkuneuvo, paakaupunki:piirraPaakaupunki, tieto:piirraTieto, vitsi:piirraVitsi, mietelause:piirraMietelause};
 
 // Piirtää kohteen annettuun säiliöön. tiivis = ruudukon pieni ruutu.
+// tiivis = "auki": ruudun "Lue lisää" – koko sisältö kuten yksittäisessä näkymässä, mutta allekkain
 function piirraSisalto(out,item,tiivis){
+  const auki = tiivis==="auki"; if(auki) tiivis = false;
   out.replaceChildren(); out.className = "out";
   const kuvat = item.kuvat || (item.kuva ? [item.kuva] : []);
   const media = el("div",null,"media");
   if(kuvat.length) media.append(teeGalleria(kuvat, item.otsikko, media));
   if(!tiivis && item.koord) media.append(teeKartta(item.koord, item.otsikko));
   if(media.children.length){
-    if(!tiivis) out.classList.add("has-img");
+    if(!tiivis && !auki) out.classList.add("has-img");
     out.append(media);
   }
   PIIRRA[item.tyyppi](out,item,tiivis);
+  if(tiivis && onLisaa(item)) out.append(nappi(T("lue_lisaa_nappi")+" ▾","inline",()=>piirraSisalto(out,item,"auki")));
+  if(auki) out.append(nappi(T("nayta_vahemman")+" ▴","inline",()=>{
+    piirraSisalto(out,item,true);
+    const t = out.closest(".tile"); if(t) t.scrollIntoView({block:"nearest"});
+  }));
+}
+// Onko tiiviissä ruudussa piilossa jotain, mitä "Lue lisää" näyttäisi
+function onLisaa(item){
+  if(item.ryhmat) return item.ryhmat.length>1 || item.ryhmat.some(g=>g.maar.length>3 || g.esim.some(Boolean));
+  return !!((item.teksti && item.teksti.length>300) || (item.tiedot && item.tiedot.length) || item.koord);
 }
 
 /* =========================================================
